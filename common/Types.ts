@@ -26,7 +26,7 @@ export type scheduledEvent = {
     title: string,
     host: string,
     location: string,
-    time: Interval,
+    time: number[],
     days: Day[]
 }
 
@@ -35,4 +35,11 @@ export type Interval = {
     startMin:number,
     endHr:number,
     endMin:number
+};
+
+export type User = {
+    first: string,
+    last: string,
+    year: number,
+    college: string,
 };
