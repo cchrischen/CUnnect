@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HeaderSimple from "./components/Header";
 import { PATHS } from "./constants/Navigation";
+import AuthUserProvider from "./auth/AuthUserProvider";
 
 function App() {
 
@@ -19,14 +20,15 @@ function App() {
 
     return (
         <>
-            <BrowserRouter>
-                <div className="root">
-                    <Routes>
-                        {routes}
-                    </Routes>
-                </div>
-            </BrowserRouter>
-        
+            <AuthUserProvider>
+                <BrowserRouter>
+                    <div className="root">
+                        <Routes>
+                            {routes}
+                        </Routes>
+                    </div>
+                </BrowserRouter>
+            </AuthUserProvider>
         </>
     );
 }
