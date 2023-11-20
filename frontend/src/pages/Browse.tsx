@@ -1,8 +1,8 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Container, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, TextField, Typography } from "@mui/material"
 import { styled } from "@mui/system"
-import { createContext, useContext, useMemo, useState } from "react"
-import { AccordionInfo, Event, Day, Interval } from "../../../common/Types"
-import { sampleData as data, accordionData, timeOfDays, allDaysOfWeek } from "../constants/Data"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { AccordionInfo, Event, Interval, EventAPIResponse } from "../../../common/Types"
+import { accordionData } from "../constants/Data"
 
 const PanelContext = createContext<string | false>(false);
 const FilterContext = createContext<string[]>([]);
@@ -50,9 +50,7 @@ const Details = (props: Event) => {
         );
     }
 
-    const toStringTime = (t: Interval | undefined) : string => {
-        if (t===undefined) return ""; // unreachable
-
+    const toStringTime = (t: Interval) : string => {
         const startPeriod = t.startHr >= 12 ? "pm" : "am";
         const endPeriod = t.endHr >= 12 ? "pm" : "am";
 
@@ -138,64 +136,42 @@ const AllFilters = (props: {setFilters: (f: string[]) => void}) => {
 }
 
 const BrowsePage = () => {
-
+    const [events, setEvents] = useState<Event[]>([]);
     const [search, setSearch] = useState<string>("");
     const [filters, setFilters] = useState<string[]>([]);
 
-    const isDay = (d:string) : boolean => allDaysOfWeek.includes(d);
-    const isTime = (t:string) : boolean => {
-        return timeOfDays.includes(t);
+    const getAllEvents = async() => {
+        return await fetch("http://localhost:8080/api/event")
+            .then((res) => res.json())
+            .then((data: EventAPIResponse) => data.data);
     }
-    const numToDay = (d:number) : Day => d === 0 ? "Su" :
-                                            d == 1 ? "Mo" :
-                                            d == 2 ? "Tu" :
-                                            d == 3 ? "We" :
-                                            d == 4 ? "Th" :
-                                            d == 5 ? "Fr" : "Sa" ; 
-    const overlapTime = (t1:Interval, t2:Interval | undefined) : boolean =>  {
-        return t2 == undefined || !(t1.endHr < t2.startHr || t1.startHr > t2.endHr);
-    }
-    const timeToInteral = (t:string) : Interval => t === "Morning" ? {startHr:6, startMin:0, endHr:12, endMin:0} :
-                                                    t === "Afternoon" ? {startHr:12, startMin:0, endHr:18, endMin:0} : 
-                                                    {startHr:18, startMin:0, endHr:22, endMin:0};
+
+    useEffect(() => {
+        getAllEvents().then((e) => setEvents(e));
+    }, []);
 
     const searchedEvents: Event[] = useMemo(() => {
-        return data.filter((item) => {
+        return events.filter((item) => {
             const searchQuery: string = search.trim().toLowerCase();
             return item.title.trim().toLowerCase().includes(searchQuery);
         });
-    }, [search]); 
-
-    const filteredEvents: Event[] = useMemo(() => {
-
-        if (filters.length === 0) return searchedEvents;
-
-        let dayFilters : Day[] = filters.filter((item) => isDay(item)).map((d) => d.substring(0, 2)) as Day[];
-        dayFilters = dayFilters.length == 0 ? allDaysOfWeek.map(day=>day.substring(0,2)) as Day[] : dayFilters;
-        let timeFilters: string[] = filters.filter((item) => isTime(item));
-        timeFilters = timeFilters.length == 0 ? timeOfDays : timeFilters;
- 
-        return searchedEvents.filter((e) => (e.days ?? [numToDay(new Date().getDay())]).some((d) => dayFilters.includes(d)))
-                .filter((e) => timeFilters.some((time) => overlapTime(timeToInteral(time), e.time)));   
-
-    }, [filters, searchedEvents]);
+    }, [search, events]); 
 
     const currentEvents = useMemo(() => {
-        const nowEvents = filteredEvents.filter((item => item.now));
-
+        const nowEvents = searchedEvents.filter((item) => item.now); 
         return (nowEvents.length == 0) ? 
             <h2>No events :(</h2> :
             nowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
 
-    }, [filteredEvents]);
+    }, [searchedEvents]);
 
     const nonCurrentEvents = useMemo(() => {
-        const notNowEvents = filteredEvents.filter((item) => !item.now);
+        const notNowEvents = searchedEvents.filter((item) => !item.now);
 
         return (notNowEvents.length == 0) ? 
             <h2>No events :(</h2> :
             notNowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
-    }, [filteredEvents]);
+    }, [searchedEvents]);
 
     return(
         <>

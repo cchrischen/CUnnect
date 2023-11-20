@@ -12,9 +12,9 @@ export type Event = {
     now: boolean,
     host: string,
     location: string,
-    time?: Interval,
-    days?: Day[]
-};
+    time: Interval,
+    days: Day[]
+}
 
 export type currentEvent = {
     title: string,
@@ -43,3 +43,8 @@ export type User = {
     year: number,
     college: string,
 };
+
+export type EventAPIResponse = {
+    message: string,
+    data: Event[]
+}

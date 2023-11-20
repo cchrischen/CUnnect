@@ -1,36 +1,35 @@
 import { db } from "./firebase";
-import { currentEvent, scheduledEvent } from "../common/Types";
+import { Event } from "../common/Types";
 
-const eventNowCollectionRef = db.collection("events-now");
-const eventScheduledCollectionRef = db.collection("events-scheduled");
+const eventCollectionRef = db.collection("events");
 
 export const getEvents = async () => {
-    const snapshot = await eventNowCollectionRef.get();
-    let events : {[key: string]: any} = {};
+    const snapshot = await eventCollectionRef.get();
+    let events : Event[]= [];
    
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as Event;
+        events.push(doc.data() as Event);
     });
     return events;
 };
 
 export const getNowEvents = async () => {
-    const snapshot = await eventNowCollectionRef.get();
+    const snapshot = await eventCollectionRef.where("now", "==", true).get();
     let events : {[key: string]: any} = {};
 
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as currentEvent;
+        events[doc.id] = doc.data() as Event;
     });
 
     return events;
 };
 
 export const getScheduledEvents = async () => {
-    const snapshot = await eventScheduledCollectionRef.get();
+    const snapshot = await eventCollectionRef.where("now", "==", false).get();
     let events : {[key: string]: any} = {};
 
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as scheduledEvent;
+        events[doc.id] = doc.data() as Event;
     });
     
     return events;
@@ -39,33 +38,24 @@ export const getScheduledEvents = async () => {
 export const getEventsByDay = async (days: string) => {
     const dayFilters = days.split("-");
 
-    const snapshot = await eventScheduledCollectionRef.where("days", "array-contains-any", dayFilters).get();
+    const snapshot = await eventCollectionRef.where("days", "!=", null)
+                    .where("days", "array-contains-any", dayFilters).get();
     let events: {[key: string]: any} = {};
 
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as scheduledEvent;
+        events[doc.id] = doc.data() as Event;
     });
     return events;
 };
 
-export const addScheduledEvent = async (id: string, event: scheduledEvent) => {
-    const newDoc = eventScheduledCollectionRef.doc(id);
+export const addEvent = async (id: string, event: Event) => {
+    const newDoc = eventCollectionRef.doc(id);
     return await newDoc.set(event);
 }
-
-export const addCurrentEvent = async (netid: string, event: currentEvent) => {
-    const newDoc = eventNowCollectionRef.doc(netid);
-    return await newDoc.set(event);
-};
-
-export const deleteScheduledEvent = async (id: string) => {
-    return await eventScheduledCollectionRef.doc(id).delete();
-};
-
-export const deleteCurrentEvent = async (netid: string) => {
-    return await eventNowCollectionRef.doc(netid).delete();
+export const deleteEvent = async (id: string) => {
+    return await eventCollectionRef.doc(id).delete();
 };
 
 export const updateTime = async (id: string, time: number[]) => {
-    return await eventScheduledCollectionRef.doc(id).update({time: time});
+    return await eventCollectionRef.doc(id).update({time: time});
 };
