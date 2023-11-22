@@ -1,8 +1,8 @@
 import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Container, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, TextField, Typography } from "@mui/material"
 import { styled } from "@mui/system"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { AccordionInfo, Event, Interval, EventAPIResponse } from "../../../common/Types"
-import { accordionData } from "../constants/Data"
+import { AccordionInfo, Day, Event, Interval, EventAPIResponse } from "../../../common/Types"
+import { accordionData, timeOfDays, allDaysOfWeek } from "../constants/Data"
 
 const PanelContext = createContext<string | false>(false);
 const FilterContext = createContext<string[]>([]);
@@ -140,6 +140,26 @@ const BrowsePage = () => {
     const [search, setSearch] = useState<string>("");
     const [filters, setFilters] = useState<string[]>([]);
 
+    const isDay = (d:string) : boolean => allDaysOfWeek.includes(d);
+
+    const isTime = (t:string) : boolean => {
+        return timeOfDays.includes(t);
+    }
+
+    const numToDay = (d:number) : Day => d === 0 ? "Su" :
+                                            d == 1 ? "Mo" :
+                                            d == 2 ? "Tu" :
+                                            d == 3 ? "We" :
+                                            d == 4 ? "Th" :
+                                            d == 5 ? "Fr" : "Sa" ; 
+    const overlapTime = (t1:Interval, t2:Interval | undefined) : boolean =>  {
+        return t2 == undefined || !(t1.endHr < t2.startHr || t1.startHr > t2.endHr);
+    }
+
+    const timeToInteral = (t:string) : Interval => t === "Morning" ? {startHr:6, startMin:0, endHr:12, endMin:0} :
+                                                    t === "Afternoon" ? {startHr:12, startMin:0, endHr:18, endMin:0} : 
+                                                    {startHr:18, startMin:0, endHr:22, endMin:0};
+
     const getAllEvents = async() => {
         return await fetch("http://localhost:8080/api/event")
             .then((res) => res.json())
@@ -157,21 +177,36 @@ const BrowsePage = () => {
         });
     }, [search, events]); 
 
+    const filteredEvents: Event[] = useMemo(() => {
+
+        if (filters.length === 0) return searchedEvents;
+
+        let dayFilters : Day[] = filters.filter((item) => isDay(item)).map((d) => d.substring(0, 2)) as Day[];
+        dayFilters = dayFilters.length == 0 ? allDaysOfWeek.map(day => day.substring(0,2)) as Day[] : dayFilters;
+
+        let timeFilters: string[] = filters.filter((item) => isTime(item));
+        timeFilters = timeFilters.length == 0 ? timeOfDays : timeFilters;
+
+        return searchedEvents.filter((e) => (e.days.length == 0 ? [numToDay(new Date().getDay())] : e.days).some((d) => dayFilters.includes(d)))
+                .filter((e) => timeFilters.some((time) => overlapTime(timeToInteral(time), e.time)));   
+
+    }, [filters, searchedEvents]);
+
     const currentEvents = useMemo(() => {
-        const nowEvents = searchedEvents.filter((item) => item.now); 
+        const nowEvents = filteredEvents.filter((item) => item.now); 
         return (nowEvents.length == 0) ? 
             <h2>No events :(</h2> :
             nowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
 
-    }, [searchedEvents]);
+    }, [filteredEvents]);
 
     const nonCurrentEvents = useMemo(() => {
-        const notNowEvents = searchedEvents.filter((item) => !item.now);
+        const notNowEvents = filteredEvents.filter((item) => !item.now);
 
         return (notNowEvents.length == 0) ? 
             <h2>No events :(</h2> :
             notNowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
-    }, [searchedEvents]);
+    }, [filteredEvents]);
 
     return(
         <>

@@ -15,10 +15,10 @@ export const getEvents = async () => {
 
 export const getNowEvents = async () => {
     const snapshot = await eventCollectionRef.where("now", "==", true).get();
-    let events : {[key: string]: any} = {};
-
+    let events : Event[]= [];
+   
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as Event;
+        events.push(doc.data() as Event);
     });
 
     return events;
@@ -26,10 +26,10 @@ export const getNowEvents = async () => {
 
 export const getScheduledEvents = async () => {
     const snapshot = await eventCollectionRef.where("now", "==", false).get();
-    let events : {[key: string]: any} = {};
-
+    let events : Event[]= [];
+   
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as Event;
+        events.push(doc.data() as Event);
     });
     
     return events;
@@ -40,10 +40,10 @@ export const getEventsByDay = async (days: string) => {
 
     const snapshot = await eventCollectionRef.where("days", "!=", null)
                     .where("days", "array-contains-any", dayFilters).get();
-    let events: {[key: string]: any} = {};
+    let events : Event[]= [];
 
     snapshot.forEach((doc) => {
-        events[doc.id] = doc.data() as Event;
+        events.push(doc.data() as Event);
     });
     return events;
 };

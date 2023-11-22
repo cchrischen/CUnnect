@@ -2,7 +2,7 @@ import { ConnectWithoutContact, Search } from "@mui/icons-material";
 import { Button, Box, Container, Divider, Paper, Stack } from "@mui/material";
 import { Link } from "react-router-dom"
 import { PATHS } from "../constants/Navigation";
-import { sampleData as data } from "../constants/Data";
+import { useEffect, useState } from "react";
 import { Event } from "../../../common/Types";
 
 const Title = () => {
@@ -28,14 +28,24 @@ const Title = () => {
 }
 
 const SelectEvents = () => {
-    const eventsNow: Event[] = data.filter((x: Event) => x.now);
+    const [events, setEvents] = useState<Event[]>([]);
+
+    const fetchCurrentEvents = async () => {
+        return await fetch("http://localhost:8080/api/event/now")
+                .then((res) => res.json())
+                .then((data) => data.data);
+    }
+
+    useEffect(() => {
+        fetchCurrentEvents().then((e) => setEvents(e));
+    }, []);
 
     return(
         <>
             <h2 style={{textAlign:"center"}}>Some events happening now:</h2>
             <Box>
                 <Stack direction="row" justifyContent="space-around">
-                    {eventsNow.map((e) => {
+                    {events.map((e) => {
                         return(
                             <>
                                 <Paper sx={{width:1/5}}>

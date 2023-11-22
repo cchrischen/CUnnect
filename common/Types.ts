@@ -16,20 +16,6 @@ export type Event = {
     days: Day[]
 }
 
-export type currentEvent = {
-    title: string,
-    host: string,
-    location: string
-}
-
-export type scheduledEvent = {
-    title: string,
-    host: string,
-    location: string,
-    time: number[],
-    days: Day[]
-}
-
 export type Interval = {
     startHr:number,
     startMin:number,
@@ -41,7 +27,7 @@ export type User = {
     first: string,
     last: string,
     year: number,
-    college: string,
+    college: string
 };
 
 export type EventAPIResponse = {
