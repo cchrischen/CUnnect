@@ -1,4 +1,4 @@
-import { AccordionInfo } from "../../../common/Types"
+import { AccordionInfo, Event, User } from "../../../common/Types"
 
 export const accordionData: AccordionInfo[] = [
     // {accordionName: "Activity", labelNames:["Eat", "Play", "Study"]},
@@ -9,3 +9,9 @@ export const accordionData: AccordionInfo[] = [
 export const timeOfDays: string[] = ["Morning", "Afternoon", "Evening"];
 
 export const allDaysOfWeek: string[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+export const colleges: string[] = ["AAP", "Brooks","CAS", "CALS", "CoE", "Dyson", "Hotel", "HuMec", "ILR"];
+
+export const tempEvent: Event = {title:"Loading Data...", host:"", now: true, location:"", days:[], users:[], id:"", time:{startHr:-1, startMin:-1, endHr:-1, endMin:-1}};
+
+export const tempUser: User = {first: "Loading...", last: "", college: "AAP", year: 1, joinedEvents: [], hostedEvents: []}

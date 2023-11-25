@@ -13,6 +13,11 @@ export const getEvents = async () => {
     return events;
 };
 
+export const getEvent = async (id: string) => {
+    const snapshot = await eventCollectionRef.doc(id).get();
+    return snapshot.data() as Event;
+};
+
 export const getNowEvents = async () => {
     const snapshot = await eventCollectionRef.where("now", "==", true).get();
     let events : Event[]= [];
@@ -48,9 +53,9 @@ export const getEventsByDay = async (days: string) => {
     return events;
 };
 
-export const addEvent = async (id: string, event: Event) => {
-    const newDoc = eventCollectionRef.doc(id);
-    return await newDoc.set(event);
+export const addEvent = async (event: Event ) => {
+    const newDoc = await eventCollectionRef.add(event);
+    return await eventCollectionRef.doc(newDoc.id).update({id: newDoc.id});
 }
 export const deleteEvent = async (id: string) => {
     return await eventCollectionRef.doc(id).delete();

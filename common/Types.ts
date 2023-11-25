@@ -13,7 +13,9 @@ export type Event = {
     host: string,
     location: string,
     time: Interval,
-    days: Day[]
+    days: Day[],
+    users: string[],
+    id: string
 }
 
 export type Interval = {
@@ -27,7 +29,9 @@ export type User = {
     first: string,
     last: string,
     year: number,
-    college: string
+    college: string,
+    hostedEvents: string[],
+    joinedEvents: string[]
 };
 
 export type EventAPIResponse = {

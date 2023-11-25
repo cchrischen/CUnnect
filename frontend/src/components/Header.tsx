@@ -28,7 +28,7 @@ const HeaderSimple = () => {
         handleMenu();
     }
 
-    const pages = PATHS.slice(1).map((page) => <>
+    const pages = PATHS.slice(1, 3).map((page) => <>
         <Link key={page.label} to={page.link}>
             <Button sx={{ color: "white", display: "block"}}>{page.label}</Button>
         </Link>

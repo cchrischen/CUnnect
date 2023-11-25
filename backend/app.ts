@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvents, deleteEvent } from "./event.controller";
+import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvent, getEvents, deleteEvent } from "./event.controller";
 import { Event } from "../common/Types";
-import { addUser, deleteUser, getUser, getUsers, updateCollege, updateYear } from "./users.controller";
+import { addUser, deleteUser, getUser, getUsers, updateCollege, updateYear, updateHostedEvent, updateJoinedEvents } from "./users.controller";
 
 const app = express();
 const port = 8080;
@@ -23,6 +23,24 @@ app.get(`/api/event`, async (req, res) => {
     } catch (err) {
         res.status(500).json({
             error: `ERROR: an error occurred at /api/event GET endpoint: ${err}`
+        });
+    }
+});
+
+app.get(`/api/event/:id`, async (req, res) => {
+    console.log("[GET] entering `event/:id` endpoint");
+    const id = req.params.id;
+
+    try{
+        const events = await getEvent(id);
+        
+        res.status(200).send({
+            message: `SUCCESS received event with id ${id}from the events collection in Firestore`,
+            data: events
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: `ERROR: an error occurred at /api/event/:id GET endpoint: ${err}`
         });
     }
 });
@@ -80,21 +98,22 @@ app.get(`/api/event/scheduled/day/:day`, async (req, res) => {
     }
 });
 
-app.post(`/api/event/:id`, async(req, res) => {
+app.post(`/api/event`, async(req, res) => {
     console.log("[POST] entering `event/:id` endpoint");
-    const id = req.params.id;
-    const { title, now, host, location, time, days } = req.body;
+    const { title, now, host, location, time, days, users } = req.body;
     const nowEvent: Event = {
         title,
         now, 
         host,
         location,
         time,
-        days
+        days,
+        users,
+        id: ""
     }
 
     try{
-        await addEvent(id, nowEvent);
+        const id = await addEvent(nowEvent);
         res.status(200).send({
             message: `SUCCESS added event with id: ${id} to events-now collection in Firestore`,
         });
@@ -177,11 +196,15 @@ app.post(`/api/user/:netid`, async (req, res) => {
     console.log(`[POST] entering user/:netid endpoint`);
     const netid = req.params.netid;
     const { first, last, year, college } = req.body;
+    const hostedEvents: string[] = [];
+    const joinedEvents: string[] = [];
     const user = {
         first, 
         last, 
         year,
-        college
+        college,
+        hostedEvents,
+        joinedEvents
     };
 
     try {
@@ -226,6 +249,42 @@ app.put(`/api/user/college/:netid`, async (req, res) => {
     } catch (err) {
         res.status(500).json({
             error: `ERROR: error occurred at /api/user/college/:netid PUT endpoint: ${err}`
+        });
+    }
+});
+
+app.put(`/api/user/hosted/:netid`, async (req, res) => {
+    console.log("[PUT] entering `event/user/hosted/:netid` endpoint")
+    const netid  = req.params.netid;
+    const hosted = req.body.hostedEvents;
+
+    try {
+        await updateHostedEvent(netid, hosted);
+
+        res.status(200).send({
+            message: `SUCCESS updated hosted events for user with netid: ${netid} with new hosted events`
+        });
+    } catch (err) {
+        res.status(200).json({
+            error: `ERROR: error occurred at /api/user/hosted/:netid PUT endpoint: ${err}`
+        });
+    }
+});
+
+app.put(`/api/user/joined/:netid`, async (req, res) => {
+    console.log("[PUT] entering `user/joined/:id` endpoint")
+    const netid  = req.params.netid;
+    const joined = req.body.joinedEvents;
+
+    try {
+        await updateJoinedEvents(netid, joined);
+
+        res.status(200).send({
+            message: `SUCCESS updated joined events for event with netid: ${netid} with new joined events`
+        });
+    } catch (err) {
+        res.status(200).json({
+            error: `ERROR: error occurred at /api/user/joined/:netid PUT endpoint: ${err}`
         });
     }
 });

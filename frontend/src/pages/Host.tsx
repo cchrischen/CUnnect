@@ -178,8 +178,8 @@ const HostPage = () => {
 
     const handleSubmit = async () => {
         const time = getTimeData();
-        const id = "cc2785-2"; // TEMPORARY -- make new id from auth
-        return await fetch("http://localhost:8080/api/event/" + id, {
+        const netid = "cc2785"; // TEMPORARY -- make netid from auth
+        return await fetch("http://localhost:8080/api/event", {
             method:"POST", 
             headers: {
                 'Accept': 'application/json',
@@ -192,7 +192,8 @@ const HostPage = () => {
                 location: location,
                 days: days,
                 time: time,
-                host: "Chris" // TEMPORARY -- get host name from people firestore collection
+                host: "Chris", // TEMPORARY -- get name from auth
+                users: [netid] 
             })
         });
     };
