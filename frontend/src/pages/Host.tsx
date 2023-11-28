@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { styled } from "@mui/system"
 import { allDaysOfWeek } from "../constants/Data"
 import { Day, Interval } from "../../../common/Types"
+import { useAuth } from "../auth/AuthUserProvider";
+import LoginPrompt from "../components/Login";
 
 const Fields = (props:{now: boolean, updateDays: (d: Day[]) => void, updateTitle: (t: string) => void, updateLocation: (l: string) => void}) => {
     
@@ -129,6 +131,9 @@ const HostPage = () => {
     const [location, setLocation] = useState<string>("");
     const [days, setDays] = useState<Day[]>([]);
 
+    const netid = useAuth().netid;
+    const loggedIn = useAuth().loggedIn;
+
     const ButtonText = styled("h2")({
         lineHeight:0,
     });
@@ -176,10 +181,18 @@ const HostPage = () => {
 
     };
 
+    const getFirstName = async () => {
+        return await fetch(`http://localhost:8080/api/user/${netid}`)
+            .then((res) => res.json())
+            .then((data) => data.data[0]);
+    }
+
     const handleSubmit = async () => {
-        const time = getTimeData();
-        const netid = "cc2785"; // TEMPORARY -- make netid from auth
-        return await fetch("http://localhost:8080/api/event", {
+        const time = getTimeData(); 
+        let first;
+        await getFirstName().then(u => first = u.first);
+        let id;
+        await fetch("http://localhost:8080/api/event", {
             method:"POST", 
             headers: {
                 'Accept': 'application/json',
@@ -192,8 +205,20 @@ const HostPage = () => {
                 location: location,
                 days: days,
                 time: time,
-                host: "Chris", // TEMPORARY -- get name from auth
+                host: first,
                 users: [netid] 
+            })
+        }).then((res) => res.json()).then((data) => id = data.id);
+
+        return await fetch(`http://localhost:8080/api/user/hosted/${netid}`, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify({
+                hostedEvent: id,
+                add: true
             })
         });
     };
@@ -201,26 +226,27 @@ const HostPage = () => {
     return (
         <>
             <Container sx = {{mt:4}}>
-                <Stack>
-                    <Box>
-                        <Stack direction="row" justifyContent="space-around">
-                            <Button variant={now === true ? "contained" : "outlined"} onClick={()=>handleTimeChange("now")}>
-                                <ButtonText>Now</ButtonText>
+                <LoginPrompt loggedIn={loggedIn}>
+                    <Stack>
+                        <Box>
+                            <Stack direction="row" justifyContent="space-around">
+                                <Button variant={now === true ? "contained" : "outlined"} onClick={()=>handleTimeChange("now")}>
+                                    <ButtonText>Now</ButtonText>
+                                </Button>
+                                <Button variant={now === false ? "contained" : "outlined"}>
+                                    <ButtonText onClick={()=>handleTimeChange("notnow")}>Later</ButtonText>
+                                </Button>
+                            </Stack>
+                        </Box>
+                        {now != undefined ? <Fields now={now} updateDays={setDays} updateLocation={setLocation} updateTitle={setTitle}/> : <></>}
+                        {now != undefined ? <Box style={{display:"flex", justifyContent:"center"}}>
+                            <Button variant="outlined" onClick={handleSubmit}>
+                                <ButtonText>Submit!</ButtonText>
                             </Button>
-                            <Button variant={now === false ? "contained" : "outlined"}>
-                                <ButtonText onClick={()=>handleTimeChange("notnow")}>Later</ButtonText>
-                            </Button>
-                        </Stack>
-                    </Box>
-                    {now != undefined ? <Fields now={now} updateDays={setDays} updateLocation={setLocation} updateTitle={setTitle}/> : <></>}
-                    {now != undefined ? <Box style={{display:"flex", justifyContent:"center"}}>
-                        <Button variant="outlined" onClick={handleSubmit}>
-                            <ButtonText>Submit!</ButtonText>
-                        </Button>
-                    </Box> : <></>}
-                    
-                </Stack>
-
+                        </Box> : <></>}
+                        
+                    </Stack>
+                </LoginPrompt>
             </Container>
         </>
     );

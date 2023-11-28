@@ -3,6 +3,8 @@ import { styled } from "@mui/system"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { AccordionInfo, Day, Event, Interval, EventAPIResponse } from "../../../common/Types"
 import { accordionData, timeOfDays, allDaysOfWeek } from "../constants/Data"
+import LoginPrompt from "../components/Login";
+import { useAuth } from "../auth/AuthUserProvider"
 
 const PanelContext = createContext<string | false>(false);
 const FilterContext = createContext<string[]>([]);
@@ -140,6 +142,8 @@ const BrowsePage = () => {
     const [search, setSearch] = useState<string>("");
     const [filters, setFilters] = useState<string[]>([]);
 
+    const loggedIn = useAuth().loggedIn;
+
     const isDay = (d:string) : boolean => allDaysOfWeek.includes(d);
 
     const isTime = (t:string) : boolean => {
@@ -167,7 +171,9 @@ const BrowsePage = () => {
     }
 
     useEffect(() => {
-        getAllEvents().then((e) => setEvents(e));
+        if (loggedIn) {
+            getAllEvents().then((e) => setEvents(e));
+        }
     }, []);
 
     const searchedEvents: Event[] = useMemo(() => {
@@ -211,26 +217,28 @@ const BrowsePage = () => {
     return(
         <>
             <Box>
-                <Stack direction="row">
-                    <Container sx = {{width:3/4}}>
-                        <TextField fullWidth label="Search" variant="outlined" margin="normal" onChange = {(e) => {setSearch(e.target.value)}}/>
-                        <Heading value = "Happening Now" />
-                        {currentEvents}
-                        <Divider />
-                        <Heading value = "Scheduled" />
-                        {nonCurrentEvents}
-                    </Container> 
-                    <Container sx ={{width:1/4}}>
-                        <Heading value="Filters"/>
-                        <Paper elevation={1} sx={{padding:1}}>
-                            <Typography>Current Filters: {filters.length == 0 ? "None" : filters.join(", ")}</Typography>
-                        </Paper>
-                        <Divider />
-                        <FilterContext.Provider value={filters}>
-                            <AllFilters setFilters={setFilters}/>
-                        </FilterContext.Provider>
-                    </Container>   
-                </Stack>
+                <LoginPrompt loggedIn={loggedIn}>
+                    <Stack direction="row">
+                        <Container sx = {{width:3/4}}>
+                            <TextField fullWidth label="Search" variant="outlined" margin="normal" onChange = {(e) => {setSearch(e.target.value)}}/>
+                            <Heading value = "Happening Now" />
+                            {currentEvents}
+                            <Divider />
+                            <Heading value = "Scheduled" />
+                            {nonCurrentEvents}
+                        </Container> 
+                        <Container sx ={{width:1/4}}>
+                            <Heading value="Filters"/>
+                            <Paper elevation={1} sx={{padding:1}}>
+                                <Typography>Current Filters: {filters.length == 0 ? "None" : filters.join(", ")}</Typography>
+                            </Paper>
+                            <Divider />
+                            <FilterContext.Provider value={filters}>
+                                <AllFilters setFilters={setFilters}/>
+                            </FilterContext.Provider>
+                        </Container>   
+                    </Stack>
+                </LoginPrompt>
             </Box>
         </>
     );

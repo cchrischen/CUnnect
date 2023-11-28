@@ -1,5 +1,6 @@
 import { db } from "./firebase";
 import { User } from "../common/Types";
+import { FieldValue } from "firebase-admin/firestore";
 
 const userCollectionRef = db.collection("people");
 
@@ -33,12 +34,16 @@ export const updateCollege = async (netid: string, college: string) => {
     return await userCollectionRef.doc(netid).update({college: college});
 };
 
-export const updateJoinedEvents = async (netid: string, joined: string[]) => {
-    return await userCollectionRef.doc(netid).update({joinedEvents: joined});
+export const updateJoinedEvents = async (netid: string, joined: string[], add: boolean) => {
+    return await userCollectionRef.doc(netid).update({
+        joiendEvents: add ? FieldValue.arrayUnion(joined) : FieldValue.arrayRemove(joined)
+    });
 };
 
-export const updateHostedEvent = async (netid: string, hosted: string[]) => {
-    return await userCollectionRef.doc(netid).update({hostedEvents: hosted});
+export const updateHostedEvent = async (netid: string, hosted: string, add: boolean) => {
+    return await userCollectionRef.doc(netid).update({
+        hostedEvents: add ? FieldValue.arrayUnion(hosted) : FieldValue.arrayRemove(hosted)
+    });  
 };
 
 export const deleteUser = async (netid: string) => {

@@ -1,9 +1,10 @@
 import { Box, Container, Dialog, DialogTitle, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select } from "@mui/material";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Event, User } from "../../../common/Types";
 import { colleges, tempEvent, tempUser } from "../constants/Data";
 import { MoreVert, People } from "@mui/icons-material";
+import { useAuth } from "../auth/AuthUserProvider";
+import LoginPrompt from "../components/Login";
 
 type PanelProps = {
     children: React.ReactNode,
@@ -73,7 +74,7 @@ const ProfilePanel = (props: User) => {
 }
 
 
-const EventPaper = (props: {event: string, refresh: () => void, eventType: string, netid: string, events: string[]}) => {
+const EventPaper = (props: {event: string, refresh: () => void, eventType: string, netid: string}) => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState(null);
     const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
@@ -110,7 +111,8 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
             }, 
           
             body: JSON.stringify({
-                joinedEvents: props.events.filter((e) => e != id)
+                joinedEvents: event.id,
+                add: false
             })
         }) :
         await fetch(`http://localhost:8080/api/user/hosted/${props.netid}`, {
@@ -121,7 +123,8 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
             }, 
           
             body: JSON.stringify({
-                hostedEvents: props.events.filter((e) => e != id)
+                hostedEvent: event.id,
+                add: false
             })
         });
 
@@ -185,14 +188,14 @@ const EventPanel = (props: User & {refresh: () => void, netid: string}) => {
                 <h2>Events you have created</h2>
                 {props.hostedEvents.map((e) => {
                     return(
-                        <EventPaper {...props} event={e} events={props.hostedEvents} eventType="hosted"/>
+                        <EventPaper {...props} event={e} eventType="hosted"/>
                     );
                 })}
                 <Divider sx = {{width: "100%"}}/>
                 <h2>Events you have joined</h2>
                 {props.joinedEvents.map((e) => {
                     return(
-                        <EventPaper {...props} event={e} events={props.joiendEvents} eventType="joined"/>
+                        <EventPaper {...props} event={e} eventType="joined"/>
                     );
                 })}
             </Container>
@@ -201,16 +204,17 @@ const EventPanel = (props: User & {refresh: () => void, netid: string}) => {
 }
 
 const ProfilePage = () => {
-    const params = useParams();
     const [value, setValue] = useState<number>(0);
     const [user, setUser] = useState<User>(tempUser);
+    const netid = useAuth().netid;
+    const loggedIn = useAuth().loggedIn;
 
     const handleChange = (event, val: number) => {
         setValue(val);
     }
 
     const fetchUserInfo = async () => {
-        return await fetch(`http://localhost:8080/api/user/${params.netid}`)
+        return await fetch(`http://localhost:8080/api/user/${netid}`)
             .then((res) => res.json())
             .then((data) => data.data[0]);
     };
@@ -220,25 +224,29 @@ const ProfilePage = () => {
     };
 
     useEffect(() => {
-        refresh();
+        if (loggedIn) {
+            refresh();
+        }
     }, []);
 
     return(
         <>
             <Container>
-                <h1 style={{textAlign:"center"}}>Hello {user.first}!</h1>
-                <Box sx={{ flexGrow: 1, display: 'flex'}}>
-                    <Tabs orientation="vertical" sx={{ borderColor: 'divider', width: "150px" }} value = {value} onChange={handleChange}>
-                        <Tab label="My Profile" id="vertical-tab-0"/>
-                        <Tab label="My Events" id="vertical-tab-1"/>
-                    </Tabs>
-                    <PanelTab value={value} index={0}>
-                        <ProfilePanel {...user}/>
-                    </PanelTab>
-                    <PanelTab value = {value} index={1}>
-                        <EventPanel {...user} refresh={refresh} netid={params.netid}/>
-                    </PanelTab>
-                </Box>
+                <LoginPrompt loggedIn={loggedIn}>
+                    <h1 style={{textAlign:"center"}}>Hello {user.first}!</h1>
+                    <Box sx={{ flexGrow: 1, display: 'flex'}}>
+                        <Tabs orientation="vertical" sx={{ borderColor: 'divider', width: "150px" }} value = {value} onChange={handleChange}>
+                            <Tab label="My Profile" id="vertical-tab-0"/>
+                            <Tab label="My Events" id="vertical-tab-1"/>
+                        </Tabs>
+                        <PanelTab value={value} index={0}>
+                            <ProfilePanel {...user}/>
+                        </PanelTab>
+                        <PanelTab value = {value} index={1}>
+                            <EventPanel {...user} refresh={refresh} netid={netid ?? ""}/>
+                        </PanelTab>
+                    </Box>
+                </LoginPrompt>
             </Container>
         </>
     );  

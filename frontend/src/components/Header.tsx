@@ -4,11 +4,12 @@ import { PATHS } from "../constants/Navigation";
 import { Link } from "react-router-dom";
 import { signIn, signOut } from "../auth/auth";
 import { useState } from "react";
+import { useAuth } from "../auth/AuthUserProvider";
 
 const HeaderSimple = () => {
-    const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState(null);
+    const isLoggedIn = useAuth().loggedIn;
 
     const handleSignIn = async () => {
         if (isLoggedIn) {
@@ -16,7 +17,6 @@ const HeaderSimple = () => {
         } else {
             await signIn();
         }
-        setLoggedIn(!isLoggedIn);
     }
 
     const handleMenu = () => {
@@ -58,7 +58,9 @@ const HeaderSimple = () => {
                                     </IconButton>
                                     <Menu open={isOpen} onClose={handleMenu} onClick={handleMenu} anchorEl={anchorEl}>
                                         <MenuItem>
-                                            Profile
+                                            <Link to={`/profile`}>
+                                                Profile
+                                            </Link>
                                         </MenuItem>
                                         <MenuItem onClick={handleSignIn}>
                                             Sign Out

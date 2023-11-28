@@ -116,6 +116,7 @@ app.post(`/api/event`, async(req, res) => {
         const id = await addEvent(nowEvent);
         res.status(200).send({
             message: `SUCCESS added event with id: ${id} to events-now collection in Firestore`,
+            id: id
         });
     } catch (err) {
         res.status(500).json({
@@ -256,10 +257,11 @@ app.put(`/api/user/college/:netid`, async (req, res) => {
 app.put(`/api/user/hosted/:netid`, async (req, res) => {
     console.log("[PUT] entering `event/user/hosted/:netid` endpoint")
     const netid  = req.params.netid;
-    const hosted = req.body.hostedEvents;
+    const hosted = req.body.hostedEvent;
+    const add = req.body.add;
 
     try {
-        await updateHostedEvent(netid, hosted);
+        await updateHostedEvent(netid, hosted, add);
 
         res.status(200).send({
             message: `SUCCESS updated hosted events for user with netid: ${netid} with new hosted events`
@@ -274,10 +276,11 @@ app.put(`/api/user/hosted/:netid`, async (req, res) => {
 app.put(`/api/user/joined/:netid`, async (req, res) => {
     console.log("[PUT] entering `user/joined/:id` endpoint")
     const netid  = req.params.netid;
-    const joined = req.body.joinedEvents;
+    const joined = req.body.joinedEvent;
+    const add = req.body.add;
 
     try {
-        await updateJoinedEvents(netid, joined);
+        await updateJoinedEvents(netid, joined, add);
 
         res.status(200).send({
             message: `SUCCESS updated joined events for event with netid: ${netid} with new joined events`

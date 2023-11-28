@@ -55,7 +55,8 @@ export const getEventsByDay = async (days: string) => {
 
 export const addEvent = async (event: Event ) => {
     const newDoc = await eventCollectionRef.add(event);
-    return await eventCollectionRef.doc(newDoc.id).update({id: newDoc.id});
+    await eventCollectionRef.doc(newDoc.id).update({id: newDoc.id});
+    return newDoc.id;
 }
 export const deleteEvent = async (id: string) => {
     return await eventCollectionRef.doc(id).delete();
