@@ -28,8 +28,8 @@ export type Interval = {
 export type User = {
     first: string,
     last: string,
-    year: number,
-    college: string,
+    year: number | null,
+    college: string | null,
     hostedEvents: string[],
     joinedEvents: string[]
 };

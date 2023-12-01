@@ -49,7 +49,7 @@ const ProfilePanel = (props: User) => {
                     </Grid>
                     <GridLabel label="College" />
                     <Grid item xs={10}>
-                        <Select value={props.college} disabled>
+                        <Select value={props.college ?? ""} disabled>
                             {colleges.map((c) => {
                                 return(
                                     <MenuItem value={c}>{c}</MenuItem>
@@ -59,7 +59,7 @@ const ProfilePanel = (props: User) => {
                     </Grid>
                     <GridLabel label="Year" />
                     <Grid item xs={10}>
-                        <Select value={numToYear(props.year)} disabled>
+                        <Select value={props.year ? numToYear(props.year) : ""} disabled>
                             {[...Array(5).keys()].slice(1).map((i) => {
                                 return(
                                     <MenuItem value={numToYear(i)}>{numToYear(i)}</MenuItem>
@@ -82,10 +82,10 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
 
     const fetchEvent = async () => {
         return await fetch(`http://localhost:8080/api/event/${props.event}`)
-                .then((res) => res.json())
-                .then((data) => data.data);
+        .then((res) => res.json())
+        .then((data) => data.data);
     };
-
+    
     useEffect(() => {
         fetchEvent().then((e) => setEvent(e));
     }, [])
@@ -94,27 +94,15 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
         setIsMenuOpen(!isMenuOpen);
     };
     
-    const handleMenuOpen = (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleMenuOpen = (event: any) => {
         setAnchorEl(event.currentTarget);
         handleMenu();
     };
     
-    const handleDelete = async (e, id: string) => {
+    const handleDelete = async (id: string) => {
         await fetch(`http://localhost:8080/api/event/${id}`, {method:"DELETE"});
 
-        props.eventType == "joined" ?
-        await fetch(`http://localhost:8080/api/user/joined/${props.netid}`, {
-            method:"PUT",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, 
-          
-            body: JSON.stringify({
-                joinedEvents: event.id,
-                add: false
-            })
-        }) :
         await fetch(`http://localhost:8080/api/user/hosted/${props.netid}`, {
             method:"PUT",
             headers: {
@@ -124,6 +112,36 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
           
             body: JSON.stringify({
                 hostedEvent: event.id,
+                add: false
+            })
+        });
+
+        return props.refresh();
+    };
+
+    const handleLeave = async (id: string) => {
+        await fetch(`http://localhost:8080/api/event/users/${id}`, {
+            method:"PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+          
+            body: JSON.stringify({
+                user: props.netid,
+                add: false
+            })
+        });
+
+        await fetch(`http://localhost:8080/api/user/joined/${props.netid}`, {
+            method:"PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+          
+            body: JSON.stringify({
+                joinedEvent: event.id,
                 add: false
             })
         });
@@ -155,8 +173,8 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
                         <MoreVert />
                     </IconButton>
                     <Menu open={isMenuOpen} onClose={handleMenu} onClick={handleMenu} anchorEl={anchorEl}>
-                        <MenuItem onClick={(e) => handleDelete(e, event.id)}>
-                            Delete
+                        <MenuItem onClick={props.eventType == "hosted" ? () => handleDelete(event.id) : () => handleLeave(event.id)}>
+                            {props.eventType == "hosted" ? "Delete" : "Leave"}
                         </MenuItem>
                     </Menu>
                 </Stack>
@@ -209,25 +227,26 @@ const ProfilePage = () => {
     const netid = useAuth().netid;
     const loggedIn = useAuth().loggedIn;
 
-    const handleChange = (event, val: number) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleChange = (event: any, val: number) => {
         setValue(val);
     }
 
     const fetchUserInfo = async () => {
         return await fetch(`http://localhost:8080/api/user/${netid}`)
-            .then((res) => res.json())
-            .then((data) => data.data[0]);
+        .then((res) => res.json())
+        .then((data) => data.data[0]);
     };
-
+    
     const refresh = () => {
         fetchUserInfo().then((u) => setUser(u));
     };
-
+    
     useEffect(() => {
-        if (loggedIn) {
+        if (netid && loggedIn) {
             refresh();
         }
-    }, []);
+    }, [netid]);
 
     return(
         <>

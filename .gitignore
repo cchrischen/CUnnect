@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+fly.toml
+.turbo
+dist
+
+service_account.json

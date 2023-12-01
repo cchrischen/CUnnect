@@ -32,7 +32,8 @@ const Fields = (props:{now: boolean, updateDays: (d: Day[]) => void, updateTitle
         return t < 10 ? `0${t}` : `${t}`;
     }
 
-    const handleChipClick = (cLabel: string, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+    const handleChipClick = (cLabel: string, e: any) => {
         days.includes(cLabel) ? setDays(days.filter((d) => d !== cLabel)) : setDays(days.concat([cLabel])); 
     }
 
@@ -130,6 +131,7 @@ const HostPage = () => {
     const [title, setTitle] = useState<string>("");
     const [location, setLocation] = useState<string>("");
     const [days, setDays] = useState<Day[]>([]);
+    const [submitted, setSubmitted] = useState<number>(0);
 
     const netid = useAuth().netid;
     const loggedIn = useAuth().loggedIn;
@@ -166,8 +168,10 @@ const HostPage = () => {
     }
 
     const getTimeData = (): Interval => {
-        let start = Array.from(document.getElementsByClassName("start")).map((el) => Array.from(el.children)[1].value);
-        let end = Array.from(document.getElementsByClassName("end")).map((el) => Array.from(el.children)[1].value);
+        let start: number[] | string[] = Array.from(document.getElementsByClassName("start"))
+                .map((el) => (Array.from(el.children)[1] as HTMLInputElement).value);
+        let end: number[] | string[] = Array.from(document.getElementsByClassName("end"))
+                .map((el) => (Array.from(el.children)[1] as HTMLInputElement).value);
 
         start = toIntervalTime(start);
         end = toIntervalTime(end);
@@ -188,6 +192,7 @@ const HostPage = () => {
     }
 
     const handleSubmit = async () => {
+        setSubmitted(1);
         const time = getTimeData(); 
         let first;
         await getFirstName().then(u => first = u.first);
@@ -210,7 +215,7 @@ const HostPage = () => {
             })
         }).then((res) => res.json()).then((data) => id = data.id);
 
-        return await fetch(`http://localhost:8080/api/user/hosted/${netid}`, {
+        await fetch(`http://localhost:8080/api/user/hosted/${netid}`, {
             method: "PUT",
             headers: {
                 'Accept': 'application/json',
@@ -221,6 +226,7 @@ const HostPage = () => {
                 add: true
             })
         });
+        setSubmitted(2);
     };
 
     return (
@@ -240,8 +246,8 @@ const HostPage = () => {
                         </Box>
                         {now != undefined ? <Fields now={now} updateDays={setDays} updateLocation={setLocation} updateTitle={setTitle}/> : <></>}
                         {now != undefined ? <Box style={{display:"flex", justifyContent:"center"}}>
-                            <Button variant="outlined" onClick={handleSubmit}>
-                                <ButtonText>Submit!</ButtonText>
+                            <Button variant="outlined" onClick={handleSubmit} disabled={submitted != 0}>
+                                <ButtonText>{submitted == 0 ? "Submit!" : submitted == 1 ? "..." : "Submitted!"}</ButtonText>
                             </Button>
                         </Box> : <></>}
                         

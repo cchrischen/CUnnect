@@ -31,7 +31,7 @@ const SelectEvents = () => {
     const [events, setEvents] = useState<Event[]>([]);
 
     const fetchCurrentEvents = async () => {
-        return await fetch("http://localhost:8080/api/event/now")
+        return await fetch("http://localhost:8080/api/event?eventType=now")
                 .then((res) => res.json())
                 .then((data) => data.data);
     }

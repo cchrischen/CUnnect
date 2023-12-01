@@ -23,6 +23,11 @@ export const getUser = async (netid: string) => {
 
 export const addUser = async (netid: string, user: User) => {
     const newUser = userCollectionRef.doc(netid);
+
+    if (((await newUser.get()).exists)) {
+        return;
+    }
+
     return await newUser.set(user);
 };
 
@@ -34,9 +39,10 @@ export const updateCollege = async (netid: string, college: string) => {
     return await userCollectionRef.doc(netid).update({college: college});
 };
 
-export const updateJoinedEvents = async (netid: string, joined: string[], add: boolean) => {
+export const updateJoinedEvents = async (netid: string, joined: string, add: boolean) => {
+    console.log(netid, joined, add);
     return await userCollectionRef.doc(netid).update({
-        joiendEvents: add ? FieldValue.arrayUnion(joined) : FieldValue.arrayRemove(joined)
+        joinedEvents: add ? FieldValue.arrayUnion(joined) : FieldValue.arrayRemove(joined)
     });
 };
 

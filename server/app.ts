@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvent, getEvents, deleteEvent } from "./event.controller";
+import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvent, getEvents, deleteEvent, updateUsers } from "./event.controller";
 import { Event } from "../common/Types";
 import { addUser, deleteUser, getUser, getUsers, updateCollege, updateYear, updateHostedEvent, updateJoinedEvents } from "./users.controller";
 
@@ -12,9 +12,11 @@ app.use(express.json());
 
 app.get(`/api/event`, async (req, res) => {
     console.log("[GET] entering `event` endpoint");
+    const {eventType} = req.query;
 
     try{
-        const events = await getEvents();
+        const events = eventType == "now" ? await getNowEvents() : eventType == "scheduled" ?
+             await getScheduledEvents() : await getEvents();
         
         res.status(200).send({
             message: `SUCCESS received all events from the events collection in Firestore`,
@@ -41,41 +43,6 @@ app.get(`/api/event/:id`, async (req, res) => {
     } catch (err) {
         res.status(500).json({
             error: `ERROR: an error occurred at /api/event/:id GET endpoint: ${err}`
-        });
-    }
-});
-
-app.get(`/api/event/now`, async (req, res) => {
-    console.log("[GET] entering `event/now` endpoint");
-
-    try{
-        const events = await getNowEvents();
-
-        res.status(200).send({
-            message: `SUCCESS received all events happening now from the events collection in Firestore`,
-            data: events,
-        });
-    } catch (err) {
-        res.status(500).json({
-            error: `ERROR: an error occurred at /api/event/now GET endpoint: ${err}`
-        });
-    }
-
-});
-
-app.get(`/api/event/scheduled`, async (req, res) => {
-    console.log("[GET] entering `event/scheduled` endpoint");
-
-    try{
-        const events = await getScheduledEvents();
-
-        res.status(200).send({
-            message: `SUCCESS received all events scheduled from the events collection in Firestore`,
-            data: events,
-        });
-    } catch (err) {
-        res.status(500).json({
-            error: `ERROR: an error occurred at /api/event/scheduled GET endpoint: ${err}`
         });
     }
 });
@@ -138,6 +105,25 @@ app.delete(`/api/event/:id`, async (req, res) => {
     } catch (err) {
         res.status(500).json({
             error: `ERROR: an error occurred at /api/event/:id DELETE endpoint: ${err}`
+        });
+    }
+});
+
+app.put(`/api/event/users/:id`, async (req, res) => {
+    console.log("[PUT] entering `event/users/:id` endpoint");
+    const id = req.params.id;
+    const user = req.body.user;
+    const add = req.body.add;
+
+    try {
+        await updateUsers(id, user, add);
+
+        res.status(200).send({
+            message: `SUCCESS updated users for event with id: ${id} in events collection`
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: `ERROR: error occurred at /api/event/users/:id PUT endpoint: ${err}`
         });
     }
 });
@@ -283,7 +269,7 @@ app.put(`/api/user/joined/:netid`, async (req, res) => {
         await updateJoinedEvents(netid, joined, add);
 
         res.status(200).send({
-            message: `SUCCESS updated joined events for event with netid: ${netid} with new joined events`
+            message: `SUCCESS updated joined events for user with netid: ${netid} with new joined events`
         });
     } catch (err) {
         res.status(200).json({

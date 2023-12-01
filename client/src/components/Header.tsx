@@ -23,7 +23,8 @@ const HeaderSimple = () => {
         setIsOpen(!isOpen);
     }
 
-    const handleMenuOpen = (event) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handleMenuOpen = (event: any) => {
         setAnchorEl(event.currentTarget);
         handleMenu();
     }
@@ -45,7 +46,7 @@ const HeaderSimple = () => {
                                 <Typography variant="h5" sx ={{fontWeight:700, letterSpacing: ".1rem", textTransform:"capitalize"}}>CUnnect</Typography> 
                             </Button>
                         </Link>
-                        <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }}}>
+                        <Box sx={{ flexGrow: 1, display: { xs: "flex"}}}>
                             {pages}
                         </Box>
                         <Box>

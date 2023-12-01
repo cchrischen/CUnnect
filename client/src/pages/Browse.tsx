@@ -10,7 +10,43 @@ const PanelContext = createContext<string | false>(false);
 const FilterContext = createContext<string[]>([]);
 
 const EventListing = (props: Event) => {
+    const [joined, setJoined] = useState<number>(0);
+    const netid = useAuth().netid;
+
+    const handleJoin = async (id: string) => {
+        setJoined(1);
+
+        await fetch(`http://localhost:8080/api/user/joined/${netid}`, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify({
+                joinedEvent: id,
+                add: true
+            })
+        });
+
+        await fetch(`http://localhost:8080/api/event/users/${id}`, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify({
+                user: netid,
+                add: true
+            })
+        });
+        setJoined(2);
+    };
+
     return (
+        props.users.includes(netid ?? "") ? 
+        <>
+        </>
+        :
         <>
             <Paper sx = {{margin: 4}}>
                 <Grid container alignItems = "center" spacing={0} sx={{padding:1}}>
@@ -26,7 +62,9 @@ const EventListing = (props: Event) => {
                     <Divider orientation="vertical" flexItem sx={{ mr: "-1px" }} />
                     <Grid item xs = {4} md = {2}>
                         <Grid container justifyContent="center"> 
-                            <Button variant="contained">Join!</Button>
+                            <Button variant="contained" disabled={joined != 0} onClick = {() => handleJoin(props.id)}>
+                                {joined == 0 ? "Join!" : joined == 1 ? "..." : "Joined!"}
+                            </Button>
                         </Grid>
                     </Grid>
                 </Grid>
@@ -90,12 +128,14 @@ const Heading = (props:{value: string, size?: number}) => {
     );
 };
 
-const MultiFilter = (props: AccordionInfo & {changeExpand: (p: string | false, e) => void, setFilters: (f: string[]) => void}) => { 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MultiFilter = (props: AccordionInfo & {changeExpand: (p: string | false, e: any) => void, setFilters: (f: string[]) => void}) => { 
 
     const panel = useContext(PanelContext);
     const filters = useContext(FilterContext);
 
-    const changeActivity = (f : string, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const changeActivity = (f : string, e: any) => {
         e.target.checked ? props.setFilters(filters.concat([f])) : props.setFilters(filters.filter((x) => x !== f));
     }
     
@@ -120,7 +160,8 @@ const AllFilters = (props: {setFilters: (f: string[]) => void}) => {
         
     const [expanded, setExpanded] = useState<string | false>(false);
 
-    const changeExpand = (panel : string | false, e) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const changeExpand = (panel : string | false, e: any) => {
         setExpanded(panel === expanded ? false : panel);
         e;
     }
@@ -171,9 +212,7 @@ const BrowsePage = () => {
     }
 
     useEffect(() => {
-        if (loggedIn) {
-            getAllEvents().then((e) => setEvents(e));
-        }
+        getAllEvents().then((e) => setEvents(e));
     }, []);
 
     const searchedEvents: Event[] = useMemo(() => {
