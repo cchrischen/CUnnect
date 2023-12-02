@@ -1,10 +1,11 @@
-import { Box, Container, Dialog, DialogTitle, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select } from "@mui/material";
+import { Box, Container, Dialog, DialogTitle, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Event, User } from "../../../common/Types";
 import { colleges, tempEvent, tempUser } from "../constants/Data";
 import { MoreVert, People } from "@mui/icons-material";
 import { useAuth } from "../auth/AuthUserProvider";
 import LoginPrompt from "../components/Login";
+import { mint, lightMint, generalTheme } from "../constants/Themes";
 
 type PanelProps = {
     children: React.ReactNode,
@@ -25,8 +26,8 @@ const PanelTab = (props: PanelProps) => {
 const ProfilePanel = (props: User) => {
     const GridLabel = (prop:{label:string}) => {
         return (
-            <Grid item xs = {12} md = {2}>
-                <h2>{prop.label}</h2>
+            <Grid item xs = {12} md = {3}>
+                <Typography variant="h3" sx={{margin: "20px", fontSize: "27px"}}>{prop.label}</Typography>
             </Grid>
         );
     };
@@ -40,15 +41,15 @@ const ProfilePanel = (props: User) => {
             <Container>
                 <Grid container alignItems = "center" spacing={0} sx={{padding:2}}>
                     <GridLabel label="First" />
-                    <Grid item xs={10}>
+                    <Grid item xs={9}>
                         <TextField disabled value={props.first}/>
                     </Grid>
                     <GridLabel label="Last" />
-                    <Grid item xs={10}>
+                    <Grid item xs={9}>
                         <TextField disabled value={props.last}/>
                     </Grid>
                     <GridLabel label="College" />
-                    <Grid item xs={10}>
+                    <Grid item xs={9}>
                         <Select value={props.college ?? ""} disabled>
                             {colleges.map((c) => {
                                 return(
@@ -58,7 +59,7 @@ const ProfilePanel = (props: User) => {
                         </Select>
                     </Grid>
                     <GridLabel label="Year" />
-                    <Grid item xs={10}>
+                    <Grid item xs={9}>
                         <Select value={props.year ? numToYear(props.year) : ""} disabled>
                             {[...Array(5).keys()].slice(1).map((i) => {
                                 return(
@@ -159,13 +160,13 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
 
     return(
         <>
-            <Paper style={{margin: 10, padding: 10}}>
+            <Paper sx={{margin: "10px", padding: "10px", backgroundColor: lightMint, borderStyle: "solid", borderColor: mint, borderWidth: "5px"}}>
                 <Stack direction="row" justifyContent="space-between">
                     <Box sx={{cursor:"pointer"}} onClick={handleDialogOpen}>
-                        <h3 style={{margin:0}}>{event.title}</h3>
+                        <Typography variant="h3" sx={{margin: 0}}>{event.title}</Typography>
                         <Box sx={{alignItems:"center", display:"flex"}}>
                             <People/>
-                            <p style={{display:"inline", margin:0, marginLeft:5}}>{event.users.length}</p>
+                            <Typography sx={{display: "inline", margin: 0, marginLeft: "5px"}}>{event.users.length}</Typography>
                         </Box>
                     </Box>
 
@@ -203,14 +204,14 @@ const EventPanel = (props: User & {refresh: () => void, netid: string}) => {
     return(
         <>
             <Container>
-                <h2>Events you have created</h2>
+                <Typography variant="h2">Events you have created</Typography>
                 {props.hostedEvents.map((e) => {
                     return(
                         <EventPaper {...props} event={e} eventType="hosted"/>
                     );
                 })}
                 <Divider sx = {{width: "100%"}}/>
-                <h2>Events you have joined</h2>
+                <Typography variant="h2">Events you have joined</Typography>
                 {props.joinedEvents.map((e) => {
                     return(
                         <EventPaper {...props} event={e} eventType="joined"/>
@@ -248,15 +249,18 @@ const ProfilePage = () => {
         }
     }, [netid]);
 
+    const tabStyle = generalTheme.typography.h3;
+    tabStyle.fontSize = "20px";
+
     return(
         <>
             <Container>
                 <LoginPrompt loggedIn={loggedIn}>
-                    <h1 style={{textAlign:"center"}}>Hello {user.first}!</h1>
+                    <Typography variant="h2" sx={{textAlign:"center", fontSize: "60px"}}>Hello {user.first}!</Typography>
                     <Box sx={{ flexGrow: 1, display: 'flex'}}>
                         <Tabs orientation="vertical" sx={{ borderColor: 'divider', width: "150px" }} value = {value} onChange={handleChange}>
-                            <Tab label="My Profile" id="vertical-tab-0"/>
-                            <Tab label="My Events" id="vertical-tab-1"/>
+                            <Tab sx={tabStyle} label="My Profile" id="vertical-tab-0"/>
+                            <Tab sx={tabStyle} label="My Events" id="vertical-tab-1"/>
                         </Tabs>
                         <PanelTab value={value} index={0}>
                             <ProfilePanel {...user}/>

@@ -1,127 +1,75 @@
 import { ConnectWithoutContact, Search } from "@mui/icons-material";
-import { Button, Box, Container, Divider, Paper, Stack } from "@mui/material";
+import { Box, Container, Typography, Stack } from "@mui/material";
 import { Link } from "react-router-dom"
 import { PATHS } from "../constants/Navigation";
-import { useEffect, useState } from "react";
-import { Event } from "../../../common/Types";
+import { useState } from "react";
+import Connect from "../assets/connect.png";
+import { mint, grayBlue, pastelBeige} from "../constants/Themes";
 
-const Title = () => {
-    const headingStyle = {
-        fontSize:100,
-        margin:0
-    }
+const subBoxStyle = {paddingY: "20px", height: " 100%", display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column"};
+
+const TitleBox = () => {
     
-    const subheadingStyle = {
-        fontSize:25,
-        margin:0
-    }
-
     return(
-        <>
-            <Stack sx={{height:"100%"}} alignItems="center" justifyContent="center">
-                <h1 style={headingStyle}>CUnnect</h1>
-                <h3 style={subheadingStyle}>Eat, Play, Study Together</h3>
-            </Stack>
-        </>
-    );
-
-}
-
-const SelectEvents = () => {
-    const [events, setEvents] = useState<Event[]>([]);
-
-    const fetchCurrentEvents = async () => {
-        return await fetch("http://localhost:8080/api/event?eventType=now")
-                .then((res) => res.json())
-                .then((data) => data.data);
-    }
-
-    useEffect(() => {
-        fetchCurrentEvents().then((e) => setEvents(e));
-    }, []);
-
-    return(
-        <>
-            <h2 style={{textAlign:"center"}}>Some events happening now:</h2>
-            <Box>
-                <Stack direction="row" justifyContent="space-around">
-                    {events.map((e) => {
-                        return(
-                            <>
-                                <Paper sx={{width:1/5}}>
-                                    <h3 style={{fontWeight:400, textAlign:"center"}}>{e.title}</h3>
-                                </Paper>
-                            </>
-                        );
-                    })}
-                </Stack>
+        <Container maxWidth="md" sx={{paddingY: "40px"}}>
+            <Box sx={{display: "flex", justifyContent: "center", marginBottom: "30px"}}>
+                <img src={Connect}></img>
             </Box>
-        </>
+            <Typography variant="h1">CUnnect</Typography>
+            <Typography variant="h4" sx={{fontSize: "50px"}}>Eat, Study, Play Together</Typography>
+        </Container>
     );
-}
-
-const GettingStarted = () => {
-
-    const containerStyles = {
-        marginTop:"1rem", 
-        marginBottom: "1rem", 
-        height:"90%", 
-        alignItems:"center",
-    }
-
-    const buttonStyles = {
-        width: "200px",
-        height:"200px"
-    }
-
-    return (
-        <>
-            <Container style={containerStyles}>
-                <Stack direction="row" alignItems="center" justifyContent="space-around" sx={{height:"100%"}}>
-                    <Link to={PATHS[1].link}>
-                        <Button variant = "outlined" sx={buttonStyles}>
-                            <Stack sx={{height: "80%"}}>
-                                <h1 style={{fontSize:"100px", marginTop: 0, marginBottom:0, height:"80%"}}>
-                                    <Search fontSize="inherit"/>
-                                </h1>
-                                <h3>Browse</h3>
-                            </Stack>
-                        </Button>
-                    </Link>
-                    <Link to={PATHS[2].link}>
-                        <Button variant = "outlined" sx={buttonStyles}>
-                            <Stack sx={{height: "80%"}}>
-                                <h1 style={{fontSize:"100px", marginTop: 0, marginBottom:0, height:"80%"}}>
-                                    <ConnectWithoutContact fontSize="inherit"/>
-                                </h1>
-                                <h3>Host</h3>
-                            </Stack>
-                        </Button>
-                    </Link>
-                </Stack>
-            </Container>
-        </>
+};
+    
+const BrowseBox = (props: {inBox: boolean}) => {
+    return(
+        <Container maxWidth="md" sx={subBoxStyle}>
+            <Search sx={{fontSize: props.inBox ? "250px" : "200px", marginBottom: "30px", color: "#203547"}}/>
+            <Typography variant="h1" sx={{fontSize: "40px", color: "#203547"}}>
+                Browse
+            </Typography>
+        </Container>
     );
-}
+};
+
+const HostBox = (props: {inBox: boolean}) => {
+    return(
+        <Container maxWidth="md" sx={subBoxStyle}>
+            <ConnectWithoutContact sx={{fontSize: props.inBox ? "250px" : "200px", marginBottom: "30px", color: "#203547"}}/>
+            <Typography variant="h1" sx={{fontSize: "40px", color: "#203547"}}>
+                Host
+            </Typography>
+        </Container>
+    );
+};
 
 const HomePage = () => {
+    const [mousePos, setMousePos] = useState<number>(0);
 
-    return (
-        <>
-            <Stack>
-                <Box sx={{height:"29vh"}} alignItems="center">
-                    <Title />
-                </Box>
-                <Divider></Divider>
-                <Box sx={{height:"35vh"}}>
-                    <SelectEvents />
-                </Box>
-                <Divider></Divider>
-                <Box sx={{height:"35vh"}}>
-                    <GettingStarted />
-                </Box>
-            </Stack>
-        </>
+    const handleMouseEnter = (pos: number) => {
+        setMousePos(pos);
+    };
+
+    return(
+        <Stack sx={{height:"100vh"}} direction="row">
+            <Box sx={{backgroundColor: mint, width: 2/3}} onMouseEnter={() => handleMouseEnter(0)}>
+                <TitleBox />
+            </Box>
+            <Box sx={{width: 1/3}}>
+                <Stack sx={{height: "100%"}}>
+                    <Box sx={{backgroundColor: grayBlue, height:1/2}} onMouseEnter={() => handleMouseEnter(1)}>
+                        <Link to={PATHS[1].link}>
+                            <BrowseBox inBox={mousePos == 1}/>
+                        </Link>
+                    </Box>
+                    <Box sx={{backgroundColor: pastelBeige, height: 1/2}} onMouseEnter={() => handleMouseEnter(2)}>
+                        <Link to={PATHS[2].link}>
+                            <HostBox inBox={mousePos == 2}/>
+                        </Link>
+                    </Box>
+                </Stack>
+            </Box>
+        </Stack>
     );
 };
 

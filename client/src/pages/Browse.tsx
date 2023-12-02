@@ -1,10 +1,11 @@
-import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Checkbox, Container, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, TextField, Typography } from "@mui/material"
+import { Accordion, AccordionDetails, AccordionSummary, Button, Checkbox, Container, Divider, FormControlLabel, FormGroup, Grid, Paper, Stack, TextField, Typography } from "@mui/material"
 import { styled } from "@mui/system"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { AccordionInfo, Day, Event, Interval, EventAPIResponse } from "../../../common/Types"
 import { accordionData, timeOfDays, allDaysOfWeek } from "../constants/Data"
 import LoginPrompt from "../components/Login";
 import { useAuth } from "../auth/AuthUserProvider"
+import { grayBlue, lightGrayBlue, lightMint, mint } from "../constants/Themes";
 
 const PanelContext = createContext<string | false>(false);
 const FilterContext = createContext<string[]>([]);
@@ -43,16 +44,12 @@ const EventListing = (props: Event) => {
     };
 
     return (
-        props.users.includes(netid ?? "") ? 
         <>
-        </>
-        :
-        <>
-            <Paper sx = {{margin: 4}}>
+            <Paper sx = {{margin: 2, backgroundColor: lightMint, borderStyle: "solid", borderColor: mint, borderWidth: "5px"}}>
                 <Grid container alignItems = "center" spacing={0} sx={{padding:1}}>
                     <Grid item xs = {8} md = {10}>
-                        <h2 style={{marginBottom:0, marginTop:15}}>{props.title}</h2>
-                        <p style={{marginTop:0}}>Created by: {props.host}</p>
+                        <Typography variant="h3" sx={{margin: 0}}>{props.title}</Typography>
+                        <Typography variant="subtitle1">Hosted by: {props.host}</Typography>
                         
                         <Grid container justifyContent="space-between" >
                             <Details {...props} />
@@ -63,7 +60,7 @@ const EventListing = (props: Event) => {
                     <Grid item xs = {4} md = {2}>
                         <Grid container justifyContent="center"> 
                             <Button variant="contained" disabled={joined != 0} onClick = {() => handleJoin(props.id)}>
-                                {joined == 0 ? "Join!" : joined == 1 ? "..." : "Joined!"}
+                                <Typography variant="body1" sx={{fontWeight:600}}>{joined == 0 ? "Join!" : joined == 1 ? "..." : "Joined!"}</Typography>
                             </Button>
                         </Grid>
                     </Grid>
@@ -82,11 +79,13 @@ const Details = (props: Event) => {
 
     const Location = () => {
         return (
-            <>
-                <Grid item xs = {12} md = {4}>
-                    <Item>Located at: {props.location}</Item>
-                </Grid>
-            </>
+            <Grid item xs = {12} md = {props.now ? 12 : 4}>
+                <Item>
+                    <Typography variant="h4">
+                        <b>Located at:</b><br /> {props.location}
+                    </Typography>
+                </Item>
+            </Grid>
         );
     }
 
@@ -103,30 +102,29 @@ const Details = (props: Event) => {
 
 
     return (
-        props.now ?
         <>
             <Location />
-        </> :
-        <>
-            <Location />
-            <Grid item xs = {12} md = {4}>
-                <Item>Days: {props.days}</Item>
-            </Grid>
-            <Grid item xs = {12} md = {4}>
-                <Item>Time: {toStringTime(props.time)}</Item>
-            </Grid>
+            {
+                props.now ?
+                <></> :
+                <> 
+                    <Grid item xs = {12} md = {4}>
+                        <Item>
+                            <Typography variant="h4"><b>Days:</b><br /> {props.days}</Typography>
+                        </Item>
+                    </Grid>
+                    <Grid item xs = {12} md = {4}>
+                        <Item>
+                            <Typography variant="h4"><b>Time:</b><br />{toStringTime(props.time)}</Typography>
+                        </Item>
+                    </Grid>
+                </>
+            }
+
         </>
     );
 
 }
-
-const Heading = (props:{value: string, size?: number}) => {
-    return (
-        <>
-            <h1 style={{fontSize:(props.size ?? 30)}}>{props.value}</h1>
-        </>
-    );
-};
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const MultiFilter = (props: AccordionInfo & {changeExpand: (p: string | false, e: any) => void, setFilters: (f: string[]) => void}) => { 
@@ -142,13 +140,15 @@ const MultiFilter = (props: AccordionInfo & {changeExpand: (p: string | false, e
     return (
         <>
             <Accordion expanded={panel === props.accordionName} onChange={(e) => props.changeExpand(props.accordionName, e)}>
-                <AccordionSummary sx={{backgroundColor:"lightgray"}}>
-                    {props.accordionName}
+                <AccordionSummary sx={{backgroundColor: grayBlue}}>
+                    <Typography variant="h4" sx={{fontWeight:600}}>{props.accordionName}</Typography>
                 </AccordionSummary>
-                <AccordionDetails>
+                <AccordionDetails sx={{backgroundColor: lightGrayBlue}}>
                     <FormGroup>
-                        {props.labelNames.map((item : string) => <FormControlLabel key={item} control = {<Checkbox/>} label={item} 
+                        {props.labelNames.map((item : string) => <FormControlLabel key={item} control = {<Checkbox color="secondary"/>} 
+                         label={item}
                         onChange={(e) => changeActivity(item.indexOf(" ") !== -1 ? item.substring(0, item.indexOf(" ")) : item, e)}/>)}
+                        
                     </FormGroup>
                 </AccordionDetails>
             </Accordion>
@@ -184,6 +184,7 @@ const BrowsePage = () => {
     const [filters, setFilters] = useState<string[]>([]);
 
     const loggedIn = useAuth().loggedIn;
+    const netid = useAuth().netid;
 
     const isDay = (d:string) : boolean => allDaysOfWeek.includes(d);
 
@@ -212,7 +213,7 @@ const BrowsePage = () => {
     }
 
     useEffect(() => {
-        getAllEvents().then((e) => setEvents(e));
+        getAllEvents().then((events) => setEvents(events));
     }, []);
 
     const searchedEvents: Event[] = useMemo(() => {
@@ -223,24 +224,27 @@ const BrowsePage = () => {
     }, [search, events]); 
 
     const filteredEvents: Event[] = useMemo(() => {
+        const nonJoinedEvents = searchedEvents.filter((e) => !e.users.includes(netid ?? ""));
 
-        if (filters.length === 0) return searchedEvents;
+        if (filters.length === 0) return nonJoinedEvents;
 
         let dayFilters : Day[] = filters.filter((item) => isDay(item)).map((d) => d.substring(0, 2)) as Day[];
         dayFilters = dayFilters.length == 0 ? allDaysOfWeek.map(day => day.substring(0,2)) as Day[] : dayFilters;
 
-        let timeFilters: string[] = filters.filter((item) => isTime(item));
-        timeFilters = timeFilters.length == 0 ? timeOfDays : timeFilters;
+        const timeFilters: string[] = filters.filter((item) => isTime(item));
 
-        return searchedEvents.filter((e) => (e.days.length == 0 ? [numToDay(new Date().getDay())] : e.days).some((d) => dayFilters.includes(d)))
-                .filter((e) => timeFilters.some((time) => overlapTime(timeToInteral(time), e.time)));   
+        const dayFiltered = nonJoinedEvents.filter((e) => (e.days.length == 0 ? [numToDay(new Date().getDay())] : e.days).some((d) => dayFilters.includes(d)));
+                
+        return timeFilters.length == 0 ? 
+        dayFiltered :
+        dayFiltered.filter((e) => timeFilters.some((time) => overlapTime(timeToInteral(time), e.time)));   
 
-    }, [filters, searchedEvents]);
+    }, [filters, searchedEvents, netid]);
 
     const currentEvents = useMemo(() => {
         const nowEvents = filteredEvents.filter((item) => item.now); 
         return (nowEvents.length == 0) ? 
-            <h2>No events :(</h2> :
+            <Typography variant="h3">No events :(</Typography> :
             nowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
 
     }, [filteredEvents]);
@@ -249,36 +253,36 @@ const BrowsePage = () => {
         const notNowEvents = filteredEvents.filter((item) => !item.now);
 
         return (notNowEvents.length == 0) ? 
-            <h2>No events :(</h2> :
+        <Typography variant="h3">No events :(</Typography> :
             notNowEvents.map((item) => <EventListing {...item} key={item.title + item.host} />);
     }, [filteredEvents]);
 
     return(
         <>
-            <Box>
+            <Container maxWidth="xl">
                 <LoginPrompt loggedIn={loggedIn}>
                     <Stack direction="row">
                         <Container sx = {{width:3/4}}>
-                            <TextField fullWidth label="Search" variant="outlined" margin="normal" onChange = {(e) => {setSearch(e.target.value)}}/>
-                            <Heading value = "Happening Now" />
+                            <TextField fullWidth label="Search" variant="outlined" margin="normal" onChange = {(e) => {setSearch(e.target.value)}} color="secondary"/>
+                            <Typography variant="h2">Happening Now</Typography>
                             {currentEvents}
                             <Divider />
-                            <Heading value = "Scheduled" />
+                            <Typography variant="h2">Scheduled</Typography>
                             {nonCurrentEvents}
                         </Container> 
                         <Container sx ={{width:1/4}}>
-                            <Heading value="Filters"/>
-                            <Paper elevation={1} sx={{padding:1}}>
-                                <Typography>Current Filters: {filters.length == 0 ? "None" : filters.join(", ")}</Typography>
+                            <Typography variant="h2">Filters</Typography>
+                            <Paper elevation={1} sx={{padding:1, backgroundColor: grayBlue}}>
+                                <Typography variant="h4"> <div style={{fontWeight:600}}>Current Filters:</div> {filters.length == 0 ? "None" : filters.join(", ")}</Typography>
                             </Paper>
-                            <Divider />
+                            <Divider  style={{margin: "10px"}} />
                             <FilterContext.Provider value={filters}>
                                 <AllFilters setFilters={setFilters}/>
                             </FilterContext.Provider>
                         </Container>   
                     </Stack>
                 </LoginPrompt>
-            </Box>
+            </Container>
         </>
     );
 

@@ -1,4 +1,4 @@
-import { Box, Button, Chip, Container, Grid, MenuItem, Select, Stack, TextField } from "@mui/material";
+import { Box, Button, Chip, Container, Grid, MenuItem, Select, Stack, Typography, TextField } from "@mui/material";
 import { useEffect, useState } from "react";
 import { styled } from "@mui/system"
 import { allDaysOfWeek } from "../constants/Data"
@@ -16,6 +16,7 @@ const Fields = (props:{now: boolean, updateDays: (d: Day[]) => void, updateTitle
     const TimeChooser = styled(Select)({
         margin: 5,
         minWidth: 100,
+        
     });
 
     const DayChip = styled(Chip)({
@@ -44,7 +45,7 @@ const Fields = (props:{now: boolean, updateDays: (d: Day[]) => void, updateTitle
     const GridLabel = (prop:{label:string}) => {
         return (
             <Grid item xs = {12} md = {2}>
-                <h2>{prop.label}</h2>
+                <Typography variant="h3" sx={{margin: "20px", fontSize: "27px"}}>{prop.label}</Typography>
             </Grid>
         );
     };
@@ -236,17 +237,17 @@ const HostPage = () => {
                     <Stack>
                         <Box>
                             <Stack direction="row" justifyContent="space-around">
-                                <Button variant={now === true ? "contained" : "outlined"} onClick={()=>handleTimeChange("now")}>
+                                <Button color="secondary" variant={now === true ? "contained" : "outlined"} onClick={()=>handleTimeChange("now")}>
                                     <ButtonText>Now</ButtonText>
                                 </Button>
-                                <Button variant={now === false ? "contained" : "outlined"}>
+                                <Button color="secondary" variant={now === false ? "contained" : "outlined"}>
                                     <ButtonText onClick={()=>handleTimeChange("notnow")}>Later</ButtonText>
                                 </Button>
                             </Stack>
                         </Box>
                         {now != undefined ? <Fields now={now} updateDays={setDays} updateLocation={setLocation} updateTitle={setTitle}/> : <></>}
                         {now != undefined ? <Box style={{display:"flex", justifyContent:"center"}}>
-                            <Button variant="outlined" onClick={handleSubmit} disabled={submitted != 0}>
+                            <Button color="secondary" variant="contained" onClick={handleSubmit} disabled={submitted != 0}>
                                 <ButtonText>{submitted == 0 ? "Submit!" : submitted == 1 ? "..." : "Submitted!"}</ButtonText>
                             </Button>
                         </Box> : <></>}

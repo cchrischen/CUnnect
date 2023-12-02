@@ -24,3 +24,5 @@ CUnnect is a web app that allows users to connect with others by browsing and ho
    ```sh
    pnpm dev
    ```
+   
+Credit to Freepik for HomePage svg.

@@ -31,19 +31,21 @@ const HeaderSimple = () => {
 
     const pages = PATHS.slice(1, 3).map((page) => <>
         <Link key={page.label} to={page.link}>
-            <Button sx={{ color: "white", display: "block"}}>{page.label}</Button>
+            <Button sx={{ color: "white", display: "block"}}>
+                <Typography variant="h3" sx={{fontSize:"25px"}}>{page.label}</Typography>
+            </Button>
         </Link>
     </>);
 
     return (
         <>
-            <Box >
+            <Box sx={{marginBottom: "30px"}}>
                 <AppBar position="static">
-                    <Toolbar>
+                    <Toolbar sx = {{margin: "5px 0px"}}>
                         <Link to={PATHS[0].link}>
                             <Button sx ={{ color: "white", mr:3}}>
-                                <Diversity3 sx ={{mr:1}}/>
-                                <Typography variant="h5" sx ={{fontWeight:700, letterSpacing: ".1rem", textTransform:"capitalize"}}>CUnnect</Typography> 
+                                <Diversity3 sx ={{mr:1}} />
+                                <Typography variant="h2" sx ={{fontWeight:700, letterSpacing: ".1rem", textTransform:"capitalize", margin: 0}}>CUnnect</Typography> 
                             </Button>
                         </Link>
                         <Box sx={{ flexGrow: 1, display: { xs: "flex"}}}>
@@ -60,7 +62,7 @@ const HeaderSimple = () => {
                                     <Menu open={isOpen} onClose={handleMenu} onClick={handleMenu} anchorEl={anchorEl}>
                                         <MenuItem>
                                             <Link to={`/profile`}>
-                                                Profile
+                                                <Typography sx={{color:"#000000"}}>Profile</Typography>
                                             </Link>
                                         </MenuItem>
                                         <MenuItem onClick={handleSignIn}>
