@@ -212,7 +212,8 @@ const HostPage = () => {
                 days: days,
                 time: time,
                 host: first,
-                users: [netid] 
+                users: [netid],
+                messages: []
             })
         }).then((res) => res.json()).then((data) => id = data.id);
 

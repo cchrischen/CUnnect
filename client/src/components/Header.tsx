@@ -39,7 +39,7 @@ const HeaderSimple = () => {
 
     return (
         <>
-            <Box sx={{marginBottom: "30px"}}>
+            <Box    >
                 <AppBar position="static">
                     <Toolbar sx = {{margin: "5px 0px"}}>
                         <Link to={PATHS[0].link}>

@@ -1,4 +1,4 @@
-import { Container } from "@mui/material";
+import { Container, Typography } from "@mui/material";
 
 const ErrorPage = () => {
     const style = {
@@ -9,8 +9,8 @@ const ErrorPage = () => {
 
     return(
         <Container sx={style}>
-            <h1>Uh oh!</h1>
-            <h3>Make sure your link is right.</h3>
+            <Typography variant="h2">Uh oh.</Typography>
+            <Typography variant="h4">Make sure your link is right.</Typography>
         </Container>
     );
 }  

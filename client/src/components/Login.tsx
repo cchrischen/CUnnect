@@ -1,4 +1,4 @@
-import { Button, Container } from "@mui/material";
+import { Button, Container, Typography } from "@mui/material";
 import { ReactNode } from "react";
 import { signIn } from "../auth/auth";
 
@@ -20,18 +20,14 @@ const LoginPrompt = (props: LoginProps) => {
     }
 
     return (
-        <>
-            {
-            props.loggedIn?
-            props.children :
-            <>
-                <Container sx={style}>
-                    <h1>Please login to access this page</h1>
-                    <Button variant="outlined" onClick={handleLogIn}>Login</Button>
-                </Container>
-            </>
-            }
-        </>
+        props.loggedIn?
+        props.children :
+        <Container sx={style}>
+            <Typography variant="h2">Please login to access this page</Typography>
+            <Button variant="contained" onClick={handleLogIn}>
+                <Typography variant="h4">Login</Typography>
+            </Button>
+        </Container>
     );
 };
 

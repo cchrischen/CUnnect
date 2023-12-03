@@ -71,4 +71,12 @@ export const updateUsers = async (id: string, user: string, add: boolean) => {
     return await eventCollectionRef.doc(id).update({
         users: add ? FieldValue.arrayUnion(user) : FieldValue.arrayRemove(user)
     });  
-}
+};
+
+export const updateMessages = async (id: string, message: string, netid: string, author: string) => {
+    const newMessages = (await getEvent(id)).messages;
+    newMessages.push({message: message, netid: netid, author: author});
+    return await eventCollectionRef.doc(id).update({
+        messages: newMessages
+    });
+};

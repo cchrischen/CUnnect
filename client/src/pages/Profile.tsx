@@ -1,5 +1,6 @@
-import { Box, Container, Dialog, DialogTitle, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select, Typography } from "@mui/material";
+import { Box, Container, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Event, User } from "../../../common/Types";
 import { colleges, tempEvent, tempUser } from "../constants/Data";
 import { MoreVert, People } from "@mui/icons-material";
@@ -78,7 +79,6 @@ const ProfilePanel = (props: User) => {
 const EventPaper = (props: {event: string, refresh: () => void, eventType: string, netid: string}) => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
     const [event, setEvent] = useState<Event>(tempEvent);
 
     const fetchEvent = async () => {
@@ -150,25 +150,19 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
         return props.refresh();
     };
 
-    const handleDialogOpen = () => {
-        setIsDialogOpen(true);
-    };
-
-    const handleDialogClose = () => {
-        setIsDialogOpen(false);
-    };
-
     return(
         <>
             <Paper sx={{margin: "10px", padding: "10px", backgroundColor: lightMint, borderStyle: "solid", borderColor: mint, borderWidth: "5px"}}>
                 <Stack direction="row" justifyContent="space-between">
-                    <Box sx={{cursor:"pointer"}} onClick={handleDialogOpen}>
-                        <Typography variant="h3" sx={{margin: 0}}>{event.title}</Typography>
-                        <Box sx={{alignItems:"center", display:"flex"}}>
-                            <People/>
-                            <Typography sx={{display: "inline", margin: 0, marginLeft: "5px"}}>{event.users.length}</Typography>
+                    <Link to={`/chat/${event.id}`}>
+                        <Box sx={{cursor:"pointer", color: "#000000"}}>
+                            <Typography variant="h3" sx={{margin: 0}}>{event.title}</Typography>
+                            <Box sx={{alignItems:"center", display:"flex"}}>
+                                <People/>
+                                <Typography sx={{display: "inline", margin: 0, marginLeft: "5px"}}>{event.users.length}</Typography>
+                            </Box>
                         </Box>
-                    </Box>
+                    </Link>
 
                     <IconButton onClick={handleMenuOpen}>
                         <MoreVert />
@@ -180,21 +174,7 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
                     </Menu>
                 </Stack>
             </Paper>
-            <UserDialog open={isDialogOpen} users={event.users} onClose={handleDialogClose}/>
         </>
-    );
-};
-
-const UserDialog = (props:{open: boolean, users: string[], onClose:() => void}) => {
-    return(
-        <Dialog open={props.open} onClose={props.onClose}>
-            <DialogTitle>
-                Users in Event:
-            </DialogTitle>
-            <ul style={{marginTop:0}}>
-                {props.users.map(u => <li>{u}</li>)}
-            </ul>
-        </Dialog>
     );
 };
 

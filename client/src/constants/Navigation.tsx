@@ -3,6 +3,7 @@ import BrowsePage from "../pages/Browse";
 import HostPage from "../pages/Host";
 import ProfilePage from "../pages/Profile";
 import ErrorPage from "../pages/Error";
+import ChatPage from "../pages/Chat";
 
 export const PATHS: {
     link: string;
@@ -28,6 +29,11 @@ export const PATHS: {
         link: "/profile",
         label: "Profile",
         element: <ProfilePage />
+    },
+    {
+        link: "chat/:id",
+        label: "Chat",
+        element: <ChatPage />
     },
     {
         link: "*",

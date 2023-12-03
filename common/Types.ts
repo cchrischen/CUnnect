@@ -7,6 +7,12 @@ export type AccordionInfo = {
     labelNames: string[]
 };
 
+export type Message = {
+    message: string,
+    netid: string,
+    author: string
+}
+
 export type Event = {
     title: string,
     now: boolean,
@@ -15,7 +21,8 @@ export type Event = {
     time: Interval,
     days: Day[],
     users: string[],
-    id: string
+    id: string,
+    messages: Message[]
 }
 
 export type Interval = {

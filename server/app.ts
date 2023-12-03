@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvent, getEvents, deleteEvent, updateUsers } from "./event.controller";
+import { getNowEvents, getScheduledEvents, getEventsByDay, addEvent, updateTime, getEvent, getEvents, deleteEvent, updateUsers, updateMessages } from "./event.controller";
 import { Event } from "../common/Types";
 import { addUser, deleteUser, getUser, getUsers, updateCollege, updateYear, updateHostedEvent, updateJoinedEvents } from "./users.controller";
 
@@ -76,7 +76,8 @@ app.post(`/api/event`, async(req, res) => {
         time,
         days,
         users,
-        id: ""
+        id: "",
+        messages: []
     }
 
     try{
@@ -140,8 +141,26 @@ app.put(`/api/event/scheduled/time/:id`, async (req, res) => {
             message: `SUCCESS updated scheduled event with id: ${id} with new time`
         });
     } catch (err) {
-        res.status(200).json({
+        res.status(500).json({
             error: `ERROR: error occurred at /api/event/scheduled/time/:id PUT endpoint: ${err}`
+        });
+    }
+});
+
+app.put(`/api/event/messages/:id`, async (req, res) => {
+    console.log("[PUT] entering event/messages/:id endpoint");
+    const id = req.params.id;
+    const { message, netid, author } = req.body;
+
+    try {
+        await updateMessages(id, message, netid, author);
+
+        res.status(200).json({
+            message: `SUCCESS updated messages for event with id:${id} with new message`
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: `ERROR: error occurred at /api/event/messages/:id PUT endpoint: ${err}`
         });
     }
 });
