@@ -8,7 +8,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import { AccountCircle, Diversity3 } from "@mui/icons-material";
+import { AccountCircle } from "@mui/icons-material";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
@@ -56,7 +56,7 @@ const HeaderSimple = () => {
           <Toolbar sx={{ margin: "5px 0px" }}>
             <Link to={PATHS[0].link}>
               <Button sx={{ color: "white", mr: 3 }}>
-                <Diversity3 sx={{ mr: 1 }} />
+                <img src="/favicon.svg" style={{height:"40px", paddingRight:"5px"}}></img>
                 <Typography
                   variant="h2"
                   sx={{
