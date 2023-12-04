@@ -1,15 +1,15 @@
-import { Box, Container, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select, Typography } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { Box, Button, Container, Divider, Grid, IconButton, Tab, Menu, MenuItem, Paper, Stack, Tabs, TextField, Select, Typography } from "@mui/material";
+import { useEffect, useState, ReactNode, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Event, User } from "../../../common/Types";
-import { colleges, tempEvent, tempUser } from "../constants/Data";
-import { MoreVert, People } from "@mui/icons-material";
+import { colleges, tempUser } from "../constants/Data";
+import { Edit, MoreVert, People } from "@mui/icons-material";
 import { useAuth } from "../auth/AuthUserProvider";
 import LoginPrompt from "../components/Login";
 import { mint, lightMint, generalTheme } from "../constants/Themes";
 
 type PanelProps = {
-    children: React.ReactNode,
+    children: ReactNode,
     value: number,
     index: number
 }
@@ -17,58 +17,130 @@ type PanelProps = {
 const PanelTab = (props: PanelProps) => {
     return(
         <>
-            <div hidden={props.value != props.index} id={`vertical-tabpanel-${props.index}`} style={{width:"750px"}}>
+            <div hidden={props.value != props.index} id={`vertical-tabpanel-${props.index}`} style={{width:"-webkit-fill-available"}}>
                 {props.children}
             </div>
         </>
     );
 }
 
-const ProfilePanel = (props: User) => {
-    const GridLabel = (prop:{label:string}) => {
-        return (
-            <Grid item xs = {12} md = {3}>
-                <Typography variant="h3" sx={{margin: "20px", fontSize: "27px"}}>{prop.label}</Typography>
-            </Grid>
-        );
+const GridLabel = (prop:{label:string}) => {
+    return (
+        <Grid item xs = {12} md = {3}>
+            <Typography variant="h3" sx={{margin: "20px", fontSize: "27px"}}>{prop.label}</Typography>
+        </Grid>
+    );
+};
+
+type ProfileDetailsProps= {
+    children: ReactNode[],
+    netid: string,
+    editing: number,
+    setEditing: (i: number) => void,
+    details: (string|number|null)[]
+};
+
+const ProfileDetails = (props: ProfileDetailsProps) => {
+    const labels = ["First", "Last", "College", "Year"];
+    const [saving, setSaving] = useState<boolean>(false);
+
+    const handleIconClick = (index: number) => props.setEditing(index);
+    const handleCancel = () => props.setEditing(-1);
+
+    const handleSave = async (index: number) => {
+        const updatedDetail = labels[index].toLowerCase();
+        const url = `http://localhost:8080/api/user/${updatedDetail}/${props.netid}`;
+        const body: {[key: string]: string|number|null} = {};
+        body[updatedDetail] = props.details[index];
+        setSaving(true);
+
+        await fetch(url, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }, 
+            body: JSON.stringify(body)
+        });
+
+        setSaving(false);
+        props.setEditing(-1);
     };
+
+    return(
+        props.children.map((child, index) => 
+            <Box key={labels[index]} sx={{display:"flex", width:"100%"}}>
+                <GridLabel label={labels[index]}/>
+                <Grid item xs={9}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Box>
+                            {child}
+                        </Box>
+                        {
+                            props.editing == index ? 
+                            <Box>
+                                <Button color="secondary" variant="contained" sx={{marginRight: "10px"}} onClick={() => handleSave(index)}>
+                                    {saving ? "..." : "SAVE"}
+                                </Button>
+                                <Button color="secondary" variant="contained" onClick={handleCancel}>CANCEL</Button>
+                            </Box> :
+                            <IconButton onClick={()=>handleIconClick(index)}>
+                                <Edit />
+                            </IconButton>
+                        }
+
+                    </Stack>
+                </Grid>
+            </Box>
+        )
+    );
+};
+
+const ProfilePanel = (props: User & {netid: string}) => {
+    const [first, setFirst] = useState<string>(props.first);
+    const [last, setLast] = useState<string>(props.last);
+    const [college, setCollege] = useState<string|null>(props.college);
+    const [year, setYear] = useState<number|null>(props.year);
+
+    const [editing, setEditing] = useState<number>(-1);
 
     const numToYear = (num: number) => {
         return num == 1 ? "Freshman" : num == 2 ? "Sophomore" : num == 3 ? "Junior" : "Senior";
-    }
+    };
+
+    const yearToNum = (year: string) => {
+        return year == "Freshman" ? 1 : year == "Sophomore" ? 2 : year == "Junior" ? 3 : 4;
+    };
+
+    useMemo(() => {
+        setFirst(props.first);
+        setLast(props.last);
+        setCollege(props.college);
+        setYear(props.year);
+    }, [props]);
 
     return (
         <>
             <Container>
                 <Grid container alignItems = "center" spacing={0} sx={{padding:2}}>
-                    <GridLabel label="First" />
-                    <Grid item xs={9}>
-                        <TextField disabled value={props.first}/>
-                    </Grid>
-                    <GridLabel label="Last" />
-                    <Grid item xs={9}>
-                        <TextField disabled value={props.last}/>
-                    </Grid>
-                    <GridLabel label="College" />
-                    <Grid item xs={9}>
-                        <Select value={props.college ?? ""} disabled>
+                    <ProfileDetails editing={editing} setEditing={setEditing} {...props} details={[first, last, college, year]}>
+                        <TextField disabled={editing != 0} value={first} onChange={e=>setFirst(e.target.value)}color="secondary"/>
+                        <TextField disabled={editing != 1} value={last} onChange={e=>setLast(e.target.value)} color="secondary"/>
+                        <Select value={college ?? ""} disabled={editing != 2} onChange={e=>setCollege(e.target.value)} color="secondary">
                             {colleges.map((c) => {
                                 return(
-                                    <MenuItem value={c}>{c}</MenuItem>
+                                    <MenuItem key={c} value={c}>{c}</MenuItem>
                                 );
                             })}
                         </Select>
-                    </Grid>
-                    <GridLabel label="Year" />
-                    <Grid item xs={9}>
-                        <Select value={props.year ? numToYear(props.year) : ""} disabled>
+                        <Select value={year ? numToYear(year) : ""} disabled={editing != 3} onChange={e=>setYear(yearToNum(e.target.value))} color="secondary">
                             {[...Array(5).keys()].slice(1).map((i) => {
                                 return(
-                                    <MenuItem value={numToYear(i)}>{numToYear(i)}</MenuItem>
+                                    <MenuItem key={i} value={numToYear(i)}>{numToYear(i)}</MenuItem>
                                 );
                             })}
                         </Select>
-                    </Grid>
+                    </ProfileDetails>
                 </Grid>
             </Container>
         </>
@@ -76,20 +148,9 @@ const ProfilePanel = (props: User) => {
 }
 
 
-const EventPaper = (props: {event: string, refresh: () => void, eventType: string, netid: string}) => {
+const EventPaper = (props: User & Event & {refresh: () => void, eventType: string, netid: string}) => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [anchorEl, setAnchorEl] = useState(null);
-    const [event, setEvent] = useState<Event>(tempEvent);
-
-    const fetchEvent = async () => {
-        return await fetch(`http://localhost:8080/api/event/${props.event}`)
-        .then((res) => res.json())
-        .then((data) => data.data);
-    };
-    
-    useEffect(() => {
-        fetchEvent().then((e) => setEvent(e));
-    }, [])
 
     const handleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -103,19 +164,6 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
     
     const handleDelete = async (id: string) => {
         await fetch(`http://localhost:8080/api/event/${id}`, {method:"DELETE"});
-
-        await fetch(`http://localhost:8080/api/user/hosted/${props.netid}`, {
-            method:"PUT",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, 
-          
-            body: JSON.stringify({
-                hostedEvent: event.id,
-                add: false
-            })
-        });
 
         return props.refresh();
     };
@@ -134,19 +182,6 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
             })
         });
 
-        await fetch(`http://localhost:8080/api/user/joined/${props.netid}`, {
-            method:"PUT",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, 
-          
-            body: JSON.stringify({
-                joinedEvent: event.id,
-                add: false
-            })
-        });
-
         return props.refresh();
     };
 
@@ -154,12 +189,12 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
         <>
             <Paper sx={{margin: "10px", padding: "10px", backgroundColor: lightMint, borderStyle: "solid", borderColor: mint, borderWidth: "5px"}}>
                 <Stack direction="row" justifyContent="space-between">
-                    <Link to={`/chat/${event.id}`}>
+                    <Link to={`/chat/${props.id}`}>
                         <Box sx={{cursor:"pointer", color: "#000000"}}>
-                            <Typography variant="h3" sx={{margin: 0}}>{event.title}</Typography>
+                            <Typography variant="h3" sx={{margin: 0}}>{props.title}</Typography>
                             <Box sx={{alignItems:"center", display:"flex"}}>
                                 <People/>
-                                <Typography sx={{display: "inline", margin: 0, marginLeft: "5px"}}>{event.users.length}</Typography>
+                                <Typography sx={{display: "inline", margin: 0, marginLeft: "5px"}}>{props.users.length}</Typography>
                             </Box>
                         </Box>
                     </Link>
@@ -168,7 +203,7 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
                         <MoreVert />
                     </IconButton>
                     <Menu open={isMenuOpen} onClose={handleMenu} onClick={handleMenu} anchorEl={anchorEl}>
-                        <MenuItem onClick={props.eventType == "hosted" ? () => handleDelete(event.id) : () => handleLeave(event.id)}>
+                        <MenuItem onClick={props.eventType == "hosted" ? () => handleDelete(props.id) : () => handleLeave(props.id)}>
                             {props.eventType == "hosted" ? "Delete" : "Leave"}
                         </MenuItem>
                     </Menu>
@@ -179,33 +214,46 @@ const EventPaper = (props: {event: string, refresh: () => void, eventType: strin
 };
 
 
-const EventPanel = (props: User & {refresh: () => void, netid: string}) => {
+const EventPanel = (props: User & {netid: string}) => {
+
+    const [hostedEvents, setHostedEvents] = useState<Event[]>([]);
+    const [joinedEvents, setJoinedEvents] = useState<Event[]>([]);
+
+    const fetchEvents = async () => {
+        await fetch(`http://localhost:8080/api/event/hosted/${props.netid}`)
+            .then(res => res.json())
+            .then(data => setHostedEvents(data.data));
+
+        await fetch(`http://localhost:8080/api/event/joined/${props.netid}`)
+            .then(res => res.json())
+            .then(data => {setJoinedEvents(data.data)});
+    };
+
+    useEffect(() => {fetchEvents()}, []);
 
     return(
-        <>
-            <Container>
-                <Typography variant="h2">Events you have created</Typography>
-                {props.hostedEvents.map((e) => {
-                    return(
-                        <EventPaper {...props} event={e} eventType="hosted"/>
-                    );
-                })}
-                <Divider sx = {{width: "100%"}}/>
-                <Typography variant="h2">Events you have joined</Typography>
-                {props.joinedEvents.map((e) => {
-                    return(
-                        <EventPaper {...props} event={e} eventType="joined"/>
-                    );
-                })}
-            </Container>
-        </>
+        <Container key={`EventPanel-${props.netid}`}>
+            <Typography variant="h2">Events you have created</Typography>
+            {hostedEvents.map((e) => {
+                return(
+                    <EventPaper {...props} {...e} refresh={fetchEvents} eventType="hosted"/>
+                );
+            })}
+            <Divider sx = {{width: "100%"}}/>
+            <Typography variant="h2">Events you have joined</Typography>
+            {joinedEvents.map((e) => {
+                return(
+                    <EventPaper {...props} {...e} refresh={fetchEvents} eventType="joined"/>
+                );
+            })}
+        </Container>
     );
 }
 
 const ProfilePage = () => {
     const [value, setValue] = useState<number>(0);
     const [user, setUser] = useState<User>(tempUser);
-    const netid = useAuth().netid;
+    const netid = useAuth().netid ?? "";
     const loggedIn = useAuth().loggedIn;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -243,10 +291,10 @@ const ProfilePage = () => {
                             <Tab sx={tabStyle} label="My Events" id="vertical-tab-1"/>
                         </Tabs>
                         <PanelTab value={value} index={0}>
-                            <ProfilePanel {...user}/>
+                            <ProfilePanel {...user} netid={netid}/>
                         </PanelTab>
                         <PanelTab value = {value} index={1}>
-                            <EventPanel {...user} refresh={refresh} netid={netid ?? ""}/>
+                            <EventPanel {...user} netid={netid}/>
                         </PanelTab>
                     </Box>
                 </LoginPrompt>

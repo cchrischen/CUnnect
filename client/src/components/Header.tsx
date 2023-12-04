@@ -29,13 +29,13 @@ const HeaderSimple = () => {
         handleMenu();
     }
 
-    const pages = PATHS.slice(1, 3).map((page) => <>
+    const pages = PATHS.slice(1, 3).map((page) => 
         <Link key={page.label} to={page.link}>
             <Button sx={{ color: "white", display: "block"}}>
                 <Typography variant="h3" sx={{fontSize:"25px"}}>{page.label}</Typography>
             </Button>
         </Link>
-    </>);
+    );
 
     return (
         <>

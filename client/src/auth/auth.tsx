@@ -25,9 +25,7 @@ export const signIn = async () => {
                 first: first,
                 last: last,
                 college: null,
-                year: null,
-                hostedEvents: [],
-                joinedEvents: []
+                year: null
             })
         });
 

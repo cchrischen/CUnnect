@@ -9,14 +9,12 @@ function App() {
 
     const routes = PATHS.map((p) => {
         return(
-            <>
-                <Route key={p.label} path={p.link} element={
-                    <>
-                        {p.label != "Home" ? <HeaderSimple /> : <></>}
-                        {p.element}
-                    </>
-                    }/>
-            </>
+            <Route key={p.label} path={p.link} element={
+                <>
+                    {p.label != "Home" ? <HeaderSimple /> : <></>}
+                    {p.element}
+                </>
+            }/>
         );
     });
 

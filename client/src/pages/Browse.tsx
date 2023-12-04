@@ -17,18 +17,6 @@ const EventListing = (props: Event) => {
     const handleJoin = async (id: string) => {
         setJoined(1);
 
-        await fetch(`http://localhost:8080/api/user/joined/${netid}`, {
-            method: "PUT",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, 
-            body: JSON.stringify({
-                joinedEvent: id,
-                add: true
-            })
-        });
-
         await fetch(`http://localhost:8080/api/event/users/${id}`, {
             method: "PUT",
             headers: {

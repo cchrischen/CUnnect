@@ -22,6 +22,7 @@ export type Event = {
     days: Day[],
     users: string[],
     id: string,
+    hostNetid: string,
     messages: Message[]
 }
 
@@ -36,9 +37,7 @@ export type User = {
     first: string,
     last: string,
     year: number | null,
-    college: string | null,
-    hostedEvents: string[],
-    joinedEvents: string[]
+    college: string | null
 };
 
 export type EventAPIResponse = {

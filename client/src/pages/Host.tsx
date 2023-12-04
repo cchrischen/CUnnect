@@ -197,7 +197,7 @@ const HostPage = () => {
         const time = getTimeData(); 
         let first;
         await getFirstName().then(u => first = u.first);
-        let id;
+
         await fetch("http://localhost:8080/api/event", {
             method:"POST", 
             headers: {
@@ -213,19 +213,8 @@ const HostPage = () => {
                 time: time,
                 host: first,
                 users: [netid],
+                hostNetid: netid,
                 messages: []
-            })
-        }).then((res) => res.json()).then((data) => id = data.id);
-
-        await fetch(`http://localhost:8080/api/user/hosted/${netid}`, {
-            method: "PUT",
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }, 
-            body: JSON.stringify({
-                hostedEvent: id,
-                add: true
             })
         });
         setSubmitted(2);

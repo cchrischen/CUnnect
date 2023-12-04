@@ -41,16 +41,25 @@ export const getScheduledEvents = async () => {
     return events;
 };
 
-export const getEventsByDay = async (days: string) => {
-    const dayFilters = days.split("-");
-
-    const snapshot = await eventCollectionRef.where("days", "!=", null)
-                    .where("days", "array-contains-any", dayFilters).get();
-    let events : Event[]= [];
-
+export const getHostedEvents = async (netid: string) => {
+    const snapshot = await eventCollectionRef.where("hostNetid", "==", netid).get();
+    let events : Event[] = [];
+   
     snapshot.forEach((doc) => {
         events.push(doc.data() as Event);
     });
+    
+    return events;
+};
+
+export const getJoinedEvents = async (netid: string) => {
+    const snapshot = await eventCollectionRef.where("users", "array-contains", netid).where("hostNetid", "!=", netid).get();
+    let events : Event[] = [];
+   
+    snapshot.forEach((doc) => {
+        events.push(doc.data() as Event);
+    });
+    
     return events;
 };
 
