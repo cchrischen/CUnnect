@@ -30,4 +30,4 @@ EXPOSE 443
 RUN npm install -g pm2
 
 # Use the start script as the entrypoint
-ENTRYPOINT ["./start.sh"]
+ENTRYPOINT ["/app/start.sh"]

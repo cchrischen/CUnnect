@@ -2,7 +2,7 @@ import { AccordionInfo, Event, User } from "@full-stack/types";
 
 // Change to http://localhost:8080 if running locally
 // Change to an empty string if hosting via fly.io
-export const serverBaseURL = "http://localhost:8080";
+export const serverBaseURL = "";
 
 export const accordionData: AccordionInfo[] = [
   // {accordionName: "Activity", labelNames:["Eat", "Play", "Study"]},

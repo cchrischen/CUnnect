@@ -338,6 +338,7 @@ const EventPanel = (props: User & { netid: string }) => {
 
   useEffect(() => {
     fetchEvents();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -376,7 +377,7 @@ const ProfilePage = () => {
   const loggedIn = useAuth().loggedIn;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChange = (event: any, val: number) => {
+  const handleChange = (_event: any, val: number) => {
     setValue(val);
   };
 
@@ -394,7 +395,8 @@ const ProfilePage = () => {
     if (netid && loggedIn) {
       refresh();
     }
-  }, [netid]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedIn, netid]);
 
   const tabStyle = generalTheme.typography.h3;
   tabStyle.fontSize = "20px";

@@ -50,7 +50,7 @@ const Fields = (props: {
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
-  const handleChipClick = (cLabel: string, e: any) => {
+  const handleChipClick = (cLabel: string, _e: any) => {
     days.includes(cLabel)
       ? setDays(days.filter((d) => d !== cLabel))
       : setDays(days.concat([cLabel]));
@@ -58,6 +58,7 @@ const Fields = (props: {
 
   useEffect(() => {
     props.updateDays(days as Day[]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days]);
 
   const GridLabel = (prop: { label: string }) => {

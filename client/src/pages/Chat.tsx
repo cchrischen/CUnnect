@@ -96,7 +96,7 @@ const ChatApp = (props: Event) => {
   const Message = (props: Message) => {
     const isSender: boolean = useMemo(() => {
       return (netid ?? "") == props.netid;
-    }, [netid]);
+    }, [props.netid]);
 
     return (
       <Container
@@ -219,7 +219,7 @@ const ChatPage = () => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [EventDoc]);
 
   return !event ? (
     <ErrorPage />
