@@ -1,5 +1,5 @@
 # CUnnect
-CUnnect is a web app built with React and Express that allows users to connect with others by browsing and hosting events. 
+CUnnect is a web app built with React and Express that allows users to connect with others by browsing and hosting events. The website is live [here](https://cunnect.fly.dev).
 
 ## Getting Started
 ### Prerequisites
