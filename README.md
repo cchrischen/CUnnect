@@ -1,5 +1,5 @@
 # CUnnect
-CUnnect is a web app that allows users to connect with others by browsing and hosting events. 
+CUnnect is a web app built with React and Express that allows users to connect with others by browsing and hosting events. 
 
 ## Getting Started
 ### Prerequisites
@@ -18,5 +18,6 @@ CUnnect is a web app that allows users to connect with others by browsing and ho
    ```sh
    pnpm dev
    ```
-   
-Credit to Freepik for HomePage svg.
+
+* Credit to [this repo](https://github.com/cornell-dti/trends-mono/tree/main/frontend-starter) for template.
+* Credit to Freepik for HomePage svg.
