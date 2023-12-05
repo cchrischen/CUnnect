@@ -1,3 +1,5 @@
+// Shared types across both frontend and backend!
+
 export type Day = "Mo" | "Tu" | "We" | "Th" | "Fr" | "Sa" | "Su";
 
 export type Activity = "Eat" | "Play" | "Study" | "";
@@ -44,3 +46,4 @@ export type EventAPIResponse = {
   message: string;
   data: Event[];
 };
+

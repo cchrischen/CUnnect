@@ -22,8 +22,8 @@ import { Link } from "react-router-dom";
 import LoginPrompt from "../components/Login";
 
 import { useAuth } from "../auth/AuthUserProvider";
-import { Event, User } from "../../../common/Types";
-import { colleges, tempUser } from "../constants/Data";
+import { Event, User } from "@full-stack/types";
+import { colleges, serverBaseURL, tempUser } from "../constants/Constants";
 import { generalTheme, lightMint, mint } from "../constants/Themes";
 
 type PanelProps = {
@@ -64,7 +64,7 @@ type ProfileDetailsProps = {
   details: (string | number | null)[];
 };
 
-const ProfileDetails = (props: ProfileDetailsProps) => {
+const ProfileDetails = (props: ProfileDetailsProps): JSX.Element => {
   const labels = ["First", "Last", "College", "Year"];
   const [saving, setSaving] = useState<boolean>(false);
 
@@ -73,7 +73,7 @@ const ProfileDetails = (props: ProfileDetailsProps) => {
 
   const handleSave = async (index: number) => {
     const updatedDetail = labels[index].toLowerCase();
-    const url = `http://localhost:8080/api/user/${updatedDetail}/${props.netid}`;
+    const url = `${serverBaseURL}/api/user/${updatedDetail}/${props.netid}`;
     const body: { [key: string]: string | number | null } = {};
     body[updatedDetail] = props.details[index];
     setSaving(true);
@@ -91,43 +91,47 @@ const ProfileDetails = (props: ProfileDetailsProps) => {
     props.setEditing(-1);
   };
 
-  return props.children.map((child, index) => (
-    <Box key={labels[index]} sx={{ display: "flex", width: "100%" }}>
-      <GridLabel label={labels[index]} />
-      <Grid item xs={9}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Box>{child}</Box>
-          {props.editing == index ? (
-            <Box>
-              <Button
-                color="secondary"
-                variant="contained"
-                sx={{ marginRight: "10px" }}
-                onClick={() => handleSave(index)}
-              >
-                {saving ? "..." : "SAVE"}
-              </Button>
-              <Button
-                color="secondary"
-                variant="contained"
-                onClick={handleCancel}
-              >
-                CANCEL
-              </Button>
-            </Box>
-          ) : (
-            <IconButton onClick={() => handleIconClick(index)}>
-              <Edit />
-            </IconButton>
-          )}
-        </Stack>
-      </Grid>
-    </Box>
-  ));
+  return( 
+    <>
+  {props.children.map((child, index) => (
+      <Box key={labels[index]} sx={{ display: "flex", width: "100%" }}>
+        <GridLabel label={labels[index]} />
+        <Grid item xs={9}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Box>{child}</Box>
+            {props.editing == index ? (
+              <Box>
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  sx={{ marginRight: "10px" }}
+                  onClick={() => handleSave(index)}
+                >
+                  {saving ? "..." : "SAVE"}
+                </Button>
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  onClick={handleCancel}
+                >
+                  CANCEL
+                </Button>
+              </Box>
+            ) : (
+              <IconButton onClick={() => handleIconClick(index)}>
+                <Edit />
+              </IconButton>
+            )}
+          </Stack>
+        </Grid>
+      </Box>
+    ))}
+    </>
+  );
 };
 
 const ProfilePanel = (props: User & { netid: string }) => {
@@ -240,13 +244,13 @@ const EventPaper = (
   };
 
   const handleDelete = async (id: string) => {
-    await fetch(`http://localhost:8080/api/event/${id}`, { method: "DELETE" });
+    await fetch(`${serverBaseURL}/api/event/${id}`, { method: "DELETE" });
 
     return props.refresh();
   };
 
   const handleLeave = async (id: string) => {
-    await fetch(`http://localhost:8080/api/event/users/${id}`, {
+    await fetch(`${serverBaseURL}/api/event/users/${id}`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -321,11 +325,11 @@ const EventPanel = (props: User & { netid: string }) => {
   const [joinedEvents, setJoinedEvents] = useState<Event[]>([]);
 
   const fetchEvents = async () => {
-    await fetch(`http://localhost:8080/api/event/hosted/${props.netid}`)
+    await fetch(`${serverBaseURL}/api/event/hosted/${props.netid}`)
       .then((res) => res.json())
       .then((data) => setHostedEvents(data.data));
 
-    await fetch(`http://localhost:8080/api/event/joined/${props.netid}`)
+    await fetch(`${serverBaseURL}/api/event/joined/${props.netid}`)
       .then((res) => res.json())
       .then((data) => {
         setJoinedEvents(data.data);
@@ -377,7 +381,7 @@ const ProfilePage = () => {
   };
 
   const fetchUserInfo = async () => {
-    return await fetch(`http://localhost:8080/api/user/${netid}`)
+    return await fetch(`${serverBaseURL}/api/user/${netid}`)
       .then((res) => res.json())
       .then((data) => data.data[0]);
   };

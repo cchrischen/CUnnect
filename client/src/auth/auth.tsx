@@ -1,5 +1,6 @@
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
+import { serverBaseURL } from "../constants/Constants";
 import { auth } from "../utils/firebase";
 
 const provider = new GoogleAuthProvider();
@@ -15,7 +16,7 @@ export const signIn = async () => {
 
     const [first, last] = (user.displayName ?? " ").split(" ");
 
-    await fetch(`http://localhost:8080/api/user/${netid}`, {
+    await fetch(`${serverBaseURL}/api/user/${netid}`, {
       method: "POST",
       headers: {
         Accept: "application/json",

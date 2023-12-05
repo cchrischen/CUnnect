@@ -16,8 +16,8 @@ import VerifyAuth from "../components/Verify";
 import ErrorPage from "./Error";
 
 import { useAuth } from "../auth/AuthUserProvider";
-import { Event, Message } from "../../../common/Types";
-import { tempEvent } from "../constants/Data";
+import { Event, Message } from "@full-stack/types";
+import { serverBaseURL, tempEvent } from "../constants/Constants";
 import { grayBlue, lightGrayBlue, lightMint } from "../constants/Themes";
 import { db } from "../utils/firebase";
 
@@ -67,11 +67,11 @@ const ChatApp = (props: Event) => {
         setSending(true);
         const tempText = text;
         setText("");
-        const first = await fetch(`http://localhost:8080/api/user/${netid}`)
+        const first = await fetch(`${serverBaseURL}/api/user/${netid}`)
           .then((res) => res.json())
           .then((data) => data.data[0].first);
 
-        await fetch(`http://localhost:8080/api/event/messages/${props.id}`, {
+        await fetch(`${serverBaseURL}/api/event/messages/${props.id}`, {
           method: "PUT",
           headers: {
             Accept: "application/json",

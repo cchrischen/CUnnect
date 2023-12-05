@@ -24,11 +24,11 @@ import {
   Event,
   Interval,
   EventAPIResponse,
-} from "../../../common/Types";
+} from "@full-stack/types";
 
 import LoginPrompt from "../components/Login";
 
-import { accordionData, timeOfDays, allDaysOfWeek } from "../constants/Data";
+import { accordionData, serverBaseURL, timeOfDays, allDaysOfWeek } from "../constants/Constants";
 import { grayBlue, lightGrayBlue, lightMint, mint } from "../constants/Themes";
 
 const PanelContext = createContext<string | false>(false);
@@ -41,7 +41,7 @@ const EventListing = (props: Event) => {
   const handleJoin = async (id: string) => {
     setJoined(1);
 
-    await fetch(`http://localhost:8080/api/event/users/${id}`, {
+    await fetch(`${serverBaseURL}/api/event/users/${id}`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -279,7 +279,7 @@ const BrowsePage = () => {
       : { startHr: 18, startMin: 0, endHr: 22, endMin: 0 };
 
   const getAllEvents = async () => {
-    return await fetch("http://localhost:8080/api/event")
+    return await fetch(`${serverBaseURL}/api/event`)
       .then((res) => res.json())
       .then((data: EventAPIResponse) => data.data);
   };

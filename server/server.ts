@@ -1,7 +1,7 @@
 import cors from "cors";
 import express from "express";
 
-import { Event, User } from "../common/Types";
+import { Event, User } from "@full-stack/types";
 import {
 	addEvent,
   deleteEvent,

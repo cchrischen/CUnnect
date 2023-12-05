@@ -1,5 +1,5 @@
 import { db } from "./firebase";
-import { User } from "../common/Types";
+import { User } from "@full-stack/types";
 
 const userCollectionRef = db.collection("people");
 

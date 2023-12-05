@@ -1,7 +1,7 @@
 import { FieldValue } from "firebase-admin/firestore";
 
 import { db } from "./firebase";
-import { Event } from "../common/Types";
+import { Event } from "@full-stack/types";
 
 const eventCollectionRef = db.collection("events");
 

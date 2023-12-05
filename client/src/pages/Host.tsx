@@ -16,8 +16,8 @@ import { useEffect, useState } from "react";
 import LoginPrompt from "../components/Login";
 
 import { useAuth } from "../auth/AuthUserProvider";
-import { Day, Interval } from "../../../common/Types";
-import { allDaysOfWeek } from "../constants/Data";
+import { Day, Interval } from "@full-stack/types";
+import { allDaysOfWeek, serverBaseURL } from "../constants/Constants";
 
 const Fields = (props: {
   now: boolean;
@@ -236,7 +236,7 @@ const HostPage = () => {
   };
 
   const getFirstName = async () => {
-    return await fetch(`http://localhost:8080/api/user/${netid}`)
+    return await fetch(`${serverBaseURL}/api/user/${netid}`)
       .then((res) => res.json())
       .then((data) => data.data[0]);
   };
@@ -247,7 +247,7 @@ const HostPage = () => {
     let first;
     await getFirstName().then((u) => (first = u.first));
 
-    await fetch("http://localhost:8080/api/event", {
+    await fetch(`${serverBaseURL}/api/event`, {
       method: "POST",
       headers: {
         Accept: "application/json",
