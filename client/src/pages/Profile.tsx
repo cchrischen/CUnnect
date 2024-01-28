@@ -278,42 +278,51 @@ const EventPaper = (
           borderWidth: "5px",
         }}
       >
-        <Stack direction="row" justifyContent="space-between">
-          <Link to={`/chat/${props.id}`}>
-            <Box sx={{ cursor: "pointer", color: "#000000" }}>
-              <Typography variant="h3" sx={{ margin: 0 }}>
-                {props.title}
+        <Stack direction="row" justifyContent="space-between" alignContent="center">
+          <Box sx={{ cursor: "pointer", color: "#000000" }}>
+            <Typography variant="h3" sx={{ margin: 0 }}>
+              {props.title}
+            </Typography>
+            <Box sx={{ alignItems: "center", display: "flex" }}>
+              <People />
+              <Typography
+                sx={{ display: "inline", margin: 0, marginLeft: "5px" }}
+              >
+                {props.users.length}
               </Typography>
-              <Box sx={{ alignItems: "center", display: "flex" }}>
-                <People />
-                <Typography
-                  sx={{ display: "inline", margin: 0, marginLeft: "5px" }}
-                >
-                  {props.users.length}
-                </Typography>
-              </Box>
             </Box>
-          </Link>
+          </Box>
 
-          <IconButton onClick={handleMenuOpen}>
-            <MoreVert />
-          </IconButton>
-          <Menu
-            open={isMenuOpen}
-            onClose={handleMenu}
-            onClick={handleMenu}
-            anchorEl={anchorEl}
-          >
-            <MenuItem
-              onClick={
-                props.eventType == "hosted"
-                  ? () => handleDelete(props.id)
-                  : () => handleLeave(props.id)
-              }
+          <Box>
+            <Link to={`/chat/${props.id}`}>
+              <Button
+                color="secondary"
+                variant="contained"
+              >
+                OPEN CHAT
+              </Button>
+            </Link>
+
+            <IconButton onClick={handleMenuOpen}>
+              <MoreVert />
+            </IconButton>
+            <Menu
+              open={isMenuOpen}
+              onClose={handleMenu}
+              onClick={handleMenu}
+              anchorEl={anchorEl}
             >
-              {props.eventType == "hosted" ? "Delete" : "Leave"}
-            </MenuItem>
-          </Menu>
+              <MenuItem
+                onClick={
+                  props.eventType == "hosted"
+                    ? () => handleDelete(props.id)
+                    : () => handleLeave(props.id)
+                }
+              >
+                {props.eventType == "hosted" ? "Delete" : "Leave"}
+              </MenuItem>
+            </Menu>
+          </Box>
         </Stack>
       </Paper>
     </>
