@@ -1,5 +1,5 @@
 # CUnnect
-CUnnect is a web app built with [React](https://react.dev/) and [Express](https://expressjs.com/) that allows users to connect with others by browsing and hosting events. The website is live [here](https://cunnect.fly.dev), but the backend does not work. Please run locally :).
+CUnnect is a web app built with [React](https://react.dev/) and [Express](https://expressjs.com/) that allows users to connect with others by browsing and hosting events.
 
 The website uses [Firebase](https://firebase.google.com/) to authenticate users and storing local data. The frontend utilizes [Material UI](https://mui.com/material-ui/) for design.
 
